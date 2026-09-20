@@ -1,0 +1,1 @@
+ALTER TABLE "scheduled_tours" DROP COLUMN "payment_type";

@@ -1,0 +1,1 @@
+ALTER TABLE "tour_photos" ADD CONSTRAINT "tour_photo_unique" UNIQUE("tour_id","url");
