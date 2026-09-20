@@ -1,0 +1,1 @@
+ALTER TABLE "tour_financials" ADD COLUMN "exchange_rate" numeric(10,4);

@@ -60,6 +60,11 @@ export const tourFinancials = pgTable("tour_financials", {
     scale: 2,
   }),
 
+  exchangeRate: numeric("exchange_rate", {
+    precision: 10,
+    scale: 4,
+  }),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
 
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
