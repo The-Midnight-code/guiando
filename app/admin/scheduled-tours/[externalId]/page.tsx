@@ -11,6 +11,7 @@ import FinancialsForm from "../FinancialsForm";
 
 import BackButton from "./BackButton";
 import EditButton from "./EditButton";
+import DeleteButton from "./DeleteButton";
 
 interface ScheduledTourPageProps {
   params: Promise<{
@@ -57,6 +58,7 @@ export default async function ScheduledTourPage({
         </p>
         <BackButton />
         <EditButton externalId={id} />
+        <DeleteButton externalId={id} />
       </div>
 
       {/* Basic information */}
