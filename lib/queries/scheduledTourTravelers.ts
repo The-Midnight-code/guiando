@@ -86,3 +86,32 @@ export async function removeTravelerFromScheduledTour(
 
   return deletedAssignment;
 }
+
+export async function syncNumberOfPeople(externalId: number) {
+  const scheduledTour = await db.query.scheduledTours.findFirst({
+    where: {
+      externalId,
+    },
+  });
+
+  if (!scheduledTour) {
+    throw new Error("Scheduled tour not found.");
+  }
+
+  const assignments = await db.query.scheduledTourTravelers.findMany({
+    where: {
+      scheduledTourId: scheduledTour.id,
+    },
+  });
+
+  const [updatedScheduledTour] = await db
+    .update(scheduledTours)
+    .set({
+      numberOfPeople: assignments.length,
+      updatedAt: new Date(),
+    })
+    .where(eq(scheduledTours.id, scheduledTour.id))
+    .returning();
+
+  return updatedScheduledTour;
+}

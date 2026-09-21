@@ -9,6 +9,7 @@ import {
 import {
   assignTravelerToScheduledTour,
   removeTravelerFromScheduledTour,
+  syncNumberOfPeople,
 } from "@/lib/queries/scheduledTourTravelers";
 
 export async function assignTravelerAction(
@@ -20,6 +21,8 @@ export async function assignTravelerAction(
       externalId,
       travelerId,
     );
+
+    await syncNumberOfPeople(externalId);
 
     return {
       success: true,
@@ -51,6 +54,8 @@ export async function removeTravelerAction(
         error: "Traveler assignment not found.",
       };
     }
+
+    await syncNumberOfPeople(externalId);
 
     return {
       success: true,

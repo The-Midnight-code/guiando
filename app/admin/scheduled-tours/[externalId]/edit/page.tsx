@@ -82,7 +82,6 @@ export default async function EditScheduledTourPage({
             endTime: scheduledTour.endTime,
             locationStart: scheduledTour.locationStart,
             locationEnd: scheduledTour.locationEnd,
-            numberOfPeople: scheduledTour.numberOfPeople,
             specialIndications: scheduledTour.specialIndications,
             tip: scheduledTour.tip,
           }}

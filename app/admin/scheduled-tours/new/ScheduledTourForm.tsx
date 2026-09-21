@@ -9,6 +9,10 @@ import {
 } from "../actions";
 
 import TravelerForm from "../TravelerForm";
+import {
+  assignTravelerAction,
+  removeTravelerAction,
+} from "../traveler-actions";
 
 interface CatalogItem {
   id: string;
@@ -33,7 +37,6 @@ interface ScheduledTourFormProps {
     endTime?: string | null;
     locationStart?: string | null;
     locationEnd?: string | null;
-    numberOfPeople?: number | null;
     specialIndications?: string | null;
     tip?: string | null;
   };
@@ -84,7 +87,6 @@ export default function ScheduledTourForm({
     endTime: initialData?.endTime ?? "",
     locationStart: initialData?.locationStart ?? "",
     locationEnd: initialData?.locationEnd ?? "",
-    numberOfPeople: initialData?.numberOfPeople?.toString() ?? "",
     specialIndications: initialData?.specialIndications ?? "",
     tip: initialData?.tip ?? "",
   });
@@ -98,22 +100,66 @@ export default function ScheduledTourForm({
 
   const [showTravelerForm, setShowTravelerForm] = useState(false);
 
-  const handleAddTraveler = (traveler: Traveler) => {
-    setSelectedTravelers((current) => {
-      if (current.some((item) => item.id === traveler.id)) {
-        return current;
-      }
+  const handleAddTraveler = async (traveler: Traveler) => {
+    const alreadySelected = selectedTravelers.some(
+      (item) => item.id === traveler.id,
+    );
 
-      return [...current, traveler];
-    });
+    if (alreadySelected) {
+      setShowTravelerForm(false);
+      return;
+    }
+
+    setSelectedTravelers((current) => [...current, traveler]);
+
+    if (externalId) {
+      console.log("ASSIGNING TRAVELER:", {
+        externalId,
+        travelerId: traveler.id,
+      });
+
+      const result = await assignTravelerAction(externalId, traveler.id);
+
+      console.log("ASSIGN TRAVELER RESULT:", result);
+
+      if (!result.success) {
+        setSelectedTravelers((current) =>
+          current.filter((item) => item.id !== traveler.id),
+        );
+
+        setError(
+          result.error ?? "Failed to assign traveler to scheduled tour.",
+        );
+
+        return;
+      }
+    }
 
     setShowTravelerForm(false);
   };
 
-  const handleRemoveTraveler = (travelerId: string) => {
+  const handleRemoveTraveler = async (travelerId: string) => {
+    const traveler = selectedTravelers.find((item) => item.id === travelerId);
+
+    if (!traveler) {
+      return;
+    }
+
     setSelectedTravelers((current) =>
-      current.filter((traveler) => traveler.id !== travelerId),
+      current.filter((item) => item.id !== travelerId),
     );
+
+    if (externalId) {
+      const result = await removeTravelerAction(externalId, travelerId);
+
+      if (!result.success) {
+        setSelectedTravelers((current) => [...current, traveler]);
+
+        setError(
+          result.error ?? "Failed to remove traveler from scheduled tour.",
+        );
+      }
+    }
   };
   const handleChange = (
     event: React.ChangeEvent<
@@ -130,9 +176,7 @@ export default function ScheduledTourForm({
     }));
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleSubmit = async () => {
     setIsSubmitting(true);
     setError(null);
 
@@ -152,23 +196,47 @@ export default function ScheduledTourForm({
         endTime: formData.endTime || undefined,
         locationStart: formData.locationStart || undefined,
         locationEnd: formData.locationEnd || undefined,
-        numberOfPeople: formData.numberOfPeople
-          ? Number(formData.numberOfPeople)
-          : undefined,
+        numberOfPeople: selectedTravelers.length,
         specialIndications: formData.specialIndications || undefined,
         tip: formData.tip || undefined,
       };
-
-      console.log("SUBMIT NUMBER OF PEOPLE:", formData.numberOfPeople);
-      console.log("INPUT NUMBER OF PEOPLE:", input.numberOfPeople);
 
       const result = externalId
         ? await updateScheduledTourAction(externalId, input)
         : await createScheduledTourAction(input);
 
-      if (!result.success) {
+      if (!result.success || !result.data) {
         setError(result.error ?? "Failed to save scheduled tour.");
         return;
+      }
+
+      if (!externalId) {
+        const createdExternalId = result.data.externalId;
+
+        if (createdExternalId == null) {
+          setError(
+            "Scheduled tour was created, but its external ID is missing.",
+          );
+          return;
+        }
+
+        const assignmentResults = await Promise.all(
+          selectedTravelers.map((traveler) =>
+            assignTravelerAction(createdExternalId, traveler.id),
+          ),
+        );
+
+        const failedAssignment = assignmentResults.find(
+          (assignment) => !assignment.success,
+        );
+
+        if (failedAssignment) {
+          setError(
+            failedAssignment.error ??
+              "Scheduled tour created, but some travelers could not be assigned.",
+          );
+          return;
+        }
       }
 
       router.push("/admin/scheduled-tours");
@@ -181,7 +249,7 @@ export default function ScheduledTourForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <div className="space-y-8">
       {error && (
         <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
           {error}
@@ -376,9 +444,9 @@ export default function ScheduledTourForm({
               id="numberOfPeople"
               name="numberOfPeople"
               type="number"
-              min="1"
-              value={formData.numberOfPeople}
-              onChange={handleChange}
+              min="0"
+              value={selectedTravelers.length}
+              readOnly
               className="w-full rounded-md border px-3 py-2"
             />
           </div>
@@ -507,112 +575,103 @@ export default function ScheduledTourForm({
         />
       </section>
 
-      {!externalId && (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Travelers
-                </h2>
+      {/* Travelers */}
+      <section className="rounded-lg border bg-white p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Travelers</h2>
 
-                <p className="mt-1 text-sm text-gray-500">
-                  Add travelers to this scheduled tour.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowTravelerForm(true)}
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-              >
-                + New Traveler
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              {selectedTravelers.length === 0 ? (
-                <p className="text-sm text-gray-500">No travelers selected.</p>
-              ) : (
-                selectedTravelers.map((traveler) => (
-                  <div
-                    key={traveler.id}
-                    className="flex items-center justify-between rounded-md border bg-white p-3"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {`${traveler.firstName} ${traveler.lastName ?? ""}`.trim()}
-                      </p>
-
-                      {traveler.email && (
-                        <p className="text-xs text-gray-500">
-                          {traveler.email}
-                        </p>
-                      )}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTraveler(traveler.id)}
-                      className="rounded-md bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-700"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {travelers.filter(
-              (traveler) =>
-                !selectedTravelers.some(
-                  (selected) => selected.id === traveler.id,
-                ),
-            ).length > 0 && (
-              <div className="mt-5 flex gap-2">
-                <select
-                  defaultValue=""
-                  onChange={(event) => {
-                    const traveler = travelers.find(
-                      (item) => item.id === event.target.value,
-                    );
-
-                    if (traveler) {
-                      handleAddTraveler(traveler);
-                      event.target.value = "";
-                    }
-                  }}
-                  className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-                >
-                  <option value="">Select existing traveler...</option>
-
-                  {travelers
-                    .filter(
-                      (traveler) =>
-                        !selectedTravelers.some(
-                          (selected) => selected.id === traveler.id,
-                        ),
-                    )
-                    .map((traveler) => (
-                      <option key={traveler.id} value={traveler.id}>
-                        {`${traveler.firstName} ${traveler.lastName ?? ""}`.trim()}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            )}
-
-            {showTravelerForm && (
-              <div className="mt-5">
-                <TravelerForm
-                  onSuccess={handleAddTraveler}
-                  onCancel={() => setShowTravelerForm(false)}
-                />
-              </div>
-            )}
+            <p className="mt-1 text-sm text-gray-500">
+              Add travelers to this scheduled tour.
+            </p>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setShowTravelerForm(true)}
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            + New Traveler
+          </button>
         </div>
-      )}
+
+        <div className="mt-4 space-y-3">
+          {selectedTravelers.length === 0 ? (
+            <p className="text-sm text-gray-500">No travelers selected.</p>
+          ) : (
+            selectedTravelers.map((traveler) => (
+              <div
+                key={traveler.id}
+                className="flex items-center justify-between rounded-md border bg-white p-3"
+              >
+                <div>
+                  <p className="text-sm font-medium text-gray-900">
+                    {`${traveler.firstName} ${traveler.lastName ?? ""}`.trim()}
+                  </p>
+
+                  {traveler.email && (
+                    <p className="text-xs text-gray-500">{traveler.email}</p>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleRemoveTraveler(traveler.id)}
+                  className="rounded-md bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-700"
+                >
+                  Remove
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+
+        {travelers.filter(
+          (traveler) =>
+            !selectedTravelers.some((selected) => selected.id === traveler.id),
+        ).length > 0 && (
+          <div className="mt-5 flex gap-2">
+            <select
+              defaultValue=""
+              onChange={(event) => {
+                const traveler = travelers.find(
+                  (item) => item.id === event.target.value,
+                );
+
+                if (traveler) {
+                  handleAddTraveler(traveler);
+                  event.target.value = "";
+                }
+              }}
+              className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+            >
+              <option value="">Select existing traveler...</option>
+
+              {travelers
+                .filter(
+                  (traveler) =>
+                    !selectedTravelers.some(
+                      (selected) => selected.id === traveler.id,
+                    ),
+                )
+                .map((traveler) => (
+                  <option key={traveler.id} value={traveler.id}>
+                    {`${traveler.firstName} ${traveler.lastName ?? ""}`.trim()}
+                  </option>
+                ))}
+            </select>
+          </div>
+        )}
+
+        {showTravelerForm && (
+          <div className="mt-5">
+            <TravelerForm
+              onSuccess={handleAddTraveler}
+              onCancel={() => setShowTravelerForm(false)}
+            />
+          </div>
+        )}
+      </section>
 
       {/* Actions */}
       <div className="flex justify-end gap-3">
@@ -626,7 +685,8 @@ export default function ScheduledTourForm({
         </button>
 
         <button
-          type="submit"
+          type="button"
+          onClick={handleSubmit}
           disabled={isSubmitting}
           className="rounded-md bg-black px-4 py-2 text-white disabled:opacity-50"
         >
@@ -637,6 +697,6 @@ export default function ScheduledTourForm({
               : "Create Scheduled Tour"}
         </button>
       </div>
-    </form>
+    </div>
   );
 }

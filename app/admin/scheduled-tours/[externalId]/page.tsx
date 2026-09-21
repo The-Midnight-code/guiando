@@ -3,12 +3,14 @@ import { getScheduledTourById } from "@/lib/queries/scheduledTours";
 import { getActiveGuides } from "@/lib/queries/guides";
 import { getGuidesForScheduledTour } from "@/lib/queries/scheduledTourGuides";
 import { getTravelers } from "@/lib/queries/travelers";
-import { getTravelersForScheduledTour } from "@/lib/queries/scheduledTourTravelers";
 
 import TravelersSection from "../TravelersSection";
 
 import GuideAssignment from "../GuideAssignment";
 import FinancialsForm from "../FinancialsForm";
+
+import BackButton from "./BackButton";
+import EditButton from "./EditButton";
 
 interface ScheduledTourPageProps {
   params: Promise<{
@@ -26,14 +28,12 @@ export default async function ScheduledTourPage({
     notFound();
   }
 
-  const [scheduledTour, guides, assignedGuides, travelers, assignedTravelers] =
-    await Promise.all([
-      getScheduledTourById(id),
-      getActiveGuides(),
-      getGuidesForScheduledTour(id),
-      getTravelers(),
-      getTravelersForScheduledTour(id),
-    ]);
+  const [scheduledTour, guides, assignedGuides, travelers] = await Promise.all([
+    getScheduledTourById(id),
+    getActiveGuides(),
+    getGuidesForScheduledTour(id),
+    getTravelers(),
+  ]);
 
   if (!scheduledTour) {
     notFound();
@@ -55,6 +55,8 @@ export default async function ScheduledTourPage({
         <p className="mt-1 text-gray-500">
           {tour?.description ?? "No description available"}
         </p>
+        <BackButton />
+        <EditButton externalId={id} />
       </div>
 
       {/* Basic information */}

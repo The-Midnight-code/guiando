@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import TravelerAssignment from "./TravelerAssignment";
 import TravelerForm from "./TravelerForm";
+import { assignTravelerAction } from "./traveler-actions";
 
 interface Traveler {
   id: string;
@@ -47,7 +48,16 @@ export default function TravelersSection({
     setShowTravelerForm(true);
   };
 
-  const handleTravelerSuccess = () => {
+  const handleTravelerSuccess = async (traveler: Traveler) => {
+    if (!editingTraveler) {
+      const result = await assignTravelerAction(externalId, traveler.id);
+
+      if (!result.success) {
+        console.error(result.error);
+        return;
+      }
+    }
+
     setShowTravelerForm(false);
     setEditingTraveler(null);
 
