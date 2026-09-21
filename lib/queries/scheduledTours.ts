@@ -9,6 +9,7 @@ import {
   ilike,
   inArray,
   or,
+  sql,
 } from "drizzle-orm";
 import {
   guides,
@@ -154,8 +155,38 @@ export async function getScheduledToursForAdmin({
         id: scheduledTours.id,
       })
       .from(scheduledTours)
+      .leftJoin(tours, eq(tours.id, scheduledTours.tourId))
+      .leftJoin(
+        scheduledTourGuides,
+        eq(scheduledTourGuides.scheduledTourId, scheduledTours.id),
+      )
+      .leftJoin(guides, eq(guides.id, scheduledTourGuides.guideId))
+      .leftJoin(users, eq(users.id, guides.userId))
       .where(whereCondition)
-      .orderBy(orderDirection(orderColumn))
+      .groupBy(scheduledTours.id, tours.name)
+      .orderBy(
+        orderDirection(
+          sortBy === "tour"
+            ? tours.name
+            : sortBy === "guide"
+              ? sql<string>`
+              min(
+                lower(
+                  concat(
+                    coalesce(${users.firstName}, ''),
+                    ' ',
+                    coalesce(${users.lastName}, '')
+                  )
+                )
+              )
+            `
+              : sortBy === "startTime"
+                ? scheduledTours.startTime
+                : sortBy === "status"
+                  ? scheduledTours.status
+                  : scheduledTours.tourDate,
+        ),
+      )
       .limit(pageSize)
       .offset(offset),
 

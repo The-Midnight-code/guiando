@@ -143,6 +143,20 @@ export default function ScheduledToursTable({
           <option value="asc">Ascending</option>
           <option value="desc">Descending</option>
         </select>
+        <select
+          value={pageSize}
+          onChange={(event) =>
+            updateParams({
+              pageSize: event.target.value,
+            })
+          }
+          className="rounded-md border px-4 py-2 text-sm"
+        >
+          <option value="10">10 per page</option>
+          <option value="20">20 per page</option>
+          <option value="50">50 per page</option>
+          <option value="100">100 per page</option>
+        </select>
       </div>
 
       <div className="overflow-x-auto rounded-lg border">

@@ -23,6 +23,8 @@ export default function Pagination({ page, totalPages }: PaginationProps) {
     router.push(`/admin/scheduled-tours?${params.toString()}`);
   };
 
+  const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+
   return (
     <div className="mt-4 flex items-center justify-between">
       <button
@@ -34,9 +36,22 @@ export default function Pagination({ page, totalPages }: PaginationProps) {
         Previous
       </button>
 
-      <span className="text-sm text-gray-600">
-        Page {page} of {totalPages}
-      </span>
+      <div className="flex items-center gap-1">
+        {pages.map((pageNumber) => (
+          <button
+            key={pageNumber}
+            type="button"
+            onClick={() => goToPage(pageNumber)}
+            className={
+              pageNumber === page
+                ? "rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white"
+                : "rounded-md border px-3 py-2 text-sm font-medium hover:bg-gray-50"
+            }
+          >
+            {pageNumber}
+          </button>
+        ))}
+      </div>
 
       <button
         type="button"

@@ -33,7 +33,15 @@ export default async function ScheduledToursPage({
   const sortDirection = params.sortDirection === "desc" ? "desc" : "asc";
 
   const page = Math.max(Number(params.page) || 1, 1);
-  const pageSize = Math.max(Number(params.pageSize) || 20, 1);
+  const requestedPageSize = Number(params.pageSize);
+
+  const pageSize =
+    requestedPageSize === 10 ||
+    requestedPageSize === 20 ||
+    requestedPageSize === 50 ||
+    requestedPageSize === 100
+      ? requestedPageSize
+      : 20;
 
   const result = await getScheduledToursForAdmin({
     search,
