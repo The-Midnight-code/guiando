@@ -110,7 +110,18 @@ export default function TourForm({
         return;
       }
 
+      if (!initialData) {
+        if (!result.data) {
+          setError("Tour was created but no tour data was returned.");
+          return;
+        }
+
+        router.push(`/admin/tours/${result.data.id}`);
+        return;
+      }
+
       router.push("/admin/tours");
+
       router.refresh();
     } catch (err) {
       console.error(err);
