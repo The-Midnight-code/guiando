@@ -1,6 +1,33 @@
 import { db } from "@/db/db";
-import { eq } from "drizzle-orm";
-import { scheduledTours } from "@/db/schema";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  exists,
+  ilike,
+  inArray,
+  or,
+} from "drizzle-orm";
+import {
+  guides,
+  pickupLocations,
+  scheduledTourGuides,
+  scheduledTours,
+  tours,
+  users,
+} from "@/db/schema";
+
+export interface GetScheduledToursForAdminParams {
+  search?: string;
+  status?: string;
+  date?: string;
+  sortBy?: "date" | "startTime" | "tour" | "status" | "guide";
+  sortDirection?: "asc" | "desc";
+  page?: number;
+  pageSize?: number;
+}
 
 export async function getScheduledTours() {
   return db.query.scheduledTours.findMany({
@@ -34,8 +61,132 @@ export async function getScheduledTours() {
   });
 }
 
-export async function getScheduledToursForAdmin() {
-  return db.query.scheduledTours.findMany({
+export async function getScheduledToursForAdmin({
+  search = "",
+  status = "all",
+  date = "",
+  sortBy = "date",
+  sortDirection = "asc",
+  page = 1,
+  pageSize = 20,
+}: GetScheduledToursForAdminParams = {}) {
+  const normalizedSearch = search.trim();
+
+  const conditions = [];
+
+  if (status !== "all") {
+    conditions.push(eq(scheduledTours.status, status));
+  }
+
+  if (date) {
+    conditions.push(eq(scheduledTours.tourDate, date));
+  }
+
+  if (normalizedSearch) {
+    const searchTerm = `%${normalizedSearch}%`;
+
+    conditions.push(
+      or(
+        exists(
+          db
+            .select({ id: tours.id })
+            .from(tours)
+            .where(
+              and(
+                eq(tours.id, scheduledTours.tourId),
+                ilike(tours.name, searchTerm),
+              ),
+            ),
+        ),
+
+        exists(
+          db
+            .select({ id: pickupLocations.id })
+            .from(pickupLocations)
+            .where(
+              and(
+                eq(pickupLocations.id, scheduledTours.pickupLocationId),
+                ilike(pickupLocations.name, searchTerm),
+              ),
+            ),
+        ),
+
+        ilike(scheduledTours.status, searchTerm),
+
+        exists(
+          db
+            .select({ id: scheduledTourGuides.id })
+            .from(scheduledTourGuides)
+            .innerJoin(guides, eq(guides.id, scheduledTourGuides.guideId))
+            .innerJoin(users, eq(users.id, guides.userId))
+            .where(
+              and(
+                eq(scheduledTourGuides.scheduledTourId, scheduledTours.id),
+                or(
+                  ilike(users.firstName, searchTerm),
+                  ilike(users.lastName, searchTerm),
+                ),
+              ),
+            ),
+        ),
+      ),
+    );
+  }
+
+  const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const offset = (page - 1) * pageSize;
+
+  const orderColumn =
+    sortBy === "date"
+      ? scheduledTours.tourDate
+      : sortBy === "startTime"
+        ? scheduledTours.startTime
+        : sortBy === "status"
+          ? scheduledTours.status
+          : scheduledTours.tourDate;
+
+  const orderDirection = sortDirection === "desc" ? desc : asc;
+
+  const [pagedTours, totalResult] = await Promise.all([
+    db
+      .select({
+        id: scheduledTours.id,
+      })
+      .from(scheduledTours)
+      .where(whereCondition)
+      .orderBy(orderDirection(orderColumn))
+      .limit(pageSize)
+      .offset(offset),
+
+    db
+      .select({
+        count: count(),
+      })
+      .from(scheduledTours)
+      .where(whereCondition),
+  ]);
+
+  const total = Number(totalResult[0]?.count ?? 0);
+
+  if (pagedTours.length === 0) {
+    return {
+      items: [],
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
+  const ids = pagedTours.map((tour) => tour.id);
+
+  const items = await db.query.scheduledTours.findMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
     with: {
       tour: true,
       pickupLocation: true,
@@ -51,11 +202,29 @@ export async function getScheduledToursForAdmin() {
         },
       },
     },
-    orderBy: (scheduledTours, { asc }) => [
-      asc(scheduledTours.tourDate),
-      asc(scheduledTours.startTime),
-    ],
   });
+
+  const itemsById = new Map(items.map((item) => [item.id, item]));
+
+  const orderedItems = ids
+    .map((id) => itemsById.get(id))
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  return {
+    items: orderedItems,
+    total,
+    page,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize),
+  };
+
+  return {
+    items,
+    total: totalResult[0]?.count ?? 0,
+    page,
+    pageSize,
+    totalPages: Math.ceil(Number(totalResult[0]?.count ?? 0) / pageSize),
+  };
 }
 
 export async function getScheduledTourById(externalId: number) {
