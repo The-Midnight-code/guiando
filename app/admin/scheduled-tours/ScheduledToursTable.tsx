@@ -159,9 +159,9 @@ export default function ScheduledToursTable({
         </select>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b bg-gray-50">
+      <div className="overflow-x-auto rounded-2xl cardBg">
+        <table className="min-w-full">
+          <thead>
             <tr>
               <th className="px-4 py-3">ID</th>
               <th className="px-4 py-3">Tour</th>
@@ -177,7 +177,7 @@ export default function ScheduledToursTable({
 
           <tbody>
             {scheduledTours.map((scheduledTour) => (
-              <tr key={scheduledTour.id} className="border-b last:border-b-0">
+              <tr key={scheduledTour.id}>
                 <td className="px-4 py-3 text-gray-500">
                   {scheduledTour.externalId ?? "—"}
                 </td>

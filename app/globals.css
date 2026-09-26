@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #101828;
+  --foreground: #f8fafc;
 }
 
 @theme inline {
@@ -12,15 +12,32 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Outfit, sans-serif;
+}
+
+.cardBg {
+  background-color: #1d2939;
+  border-color: #1d2939;
+}
+.bg-error {
+  background-color: color-mix(in oklab, #f04438 15%, transparent);
+}
+.text-error {
+  color: #f04438;
+}
+.bg-warning {
+  background-color: color-mix(in oklab, #f79009 15%, transparent);
+}
+.text-success {
+  color: #12b76a;
+}
+.text-warning {
+  color: #fd853a;
+}
+
+.text-blue {
+  color: #38bdf8;
 }

@@ -12,10 +12,7 @@ export default async function NewTourPage() {
   return (
     <main className="space-y-6">
       <div>
-        <Link
-          href="/admin/tours"
-          className="text-sm text-blue-600 hover:text-blue-800"
-        >
+        <Link href="/admin/tours" className="text-sm text-[#3B82F6]">
           ← Back to Tours
         </Link>
       </div>

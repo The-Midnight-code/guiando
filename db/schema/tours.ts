@@ -8,9 +8,6 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-import { asc, eq, and } from "drizzle-orm";
-import { db } from "@/db/db";
-
 import { tourTypes } from "./tourTypes";
 import { tourClasses } from "./tourClasses";
 
@@ -43,20 +40,3 @@ export const tours = pgTable("tours", {
 
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
-
-export async function getActiveTours(tourTypeId?: string) {
-  const conditions = [eq(tours.active, true)];
-
-  if (tourTypeId) {
-    conditions.push(eq(tours.tourTypeId, tourTypeId));
-  }
-
-  return db
-    .select({
-      id: tours.id,
-      name: tours.name,
-    })
-    .from(tours)
-    .where(and(...conditions))
-    .orderBy(asc(tours.name));
-}

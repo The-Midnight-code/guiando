@@ -1,8 +1,8 @@
-import { getFinancialReportRows } from "@/db/schema/financials";
+import { getFinancialReportRows } from "@/lib/queries/financials";
 import ReportsFilters from "@/components/reports/ReporstFilters";
-import { getActiveTourTypes } from "@/db/schema/tourTypes";
-import { getActiveTours } from "@/db/schema/tours";
-import { getScheduledTourStatuses } from "@/db/schema/scheduledTours";
+import { getActiveTourTypes } from "@/lib/queries/tourTypes";
+import { getActiveTours } from "@/lib/queries/tours";
+import { getScheduledTourStatuses } from "@/lib/queries/scheduledTours";
 
 export default async function ReportsPage({
   searchParams,
@@ -13,9 +13,11 @@ export default async function ReportsPage({
     tourTypeId?: string;
     tourId?: string;
     status?: string;
+    page?: string;
   }>;
 }) {
   const params = await searchParams;
+  const page = Math.max(1, Number(params.page ?? "1"));
 
   const today = new Date();
 
@@ -29,52 +31,63 @@ export default async function ReportsPage({
   const tourId = params.tourId;
   const status = params.status;
 
-  const [rows, tourTypes, tours, statuses] = await Promise.all([
-    getFinancialReportRows({
-      startDate,
-      endDate,
-      tourTypeId,
-      tourId,
-      status,
-    }),
+  const [report, tourTypes, tours, statuses] = await Promise.all([
+    getFinancialReportRows(
+      {
+        startDate,
+        endDate,
+        tourTypeId,
+        tourId,
+        status,
+      },
+      page,
+      20,
+    ),
     getActiveTourTypes(),
     getActiveTours(tourTypeId),
     getScheduledTourStatuses(),
   ]);
 
-  const totalPayments = rows.reduce(
-    (sum, row) => sum + Number(row.totalPaymentUsd ?? 0),
-    0,
-  );
+  const { rows, total, totalPages, summary } = report;
 
-  const totalCost = rows.reduce(
-    (sum, row) => sum + Number(row.totalCostUsd ?? 0),
-    0,
-  );
+  const { totalPayments, totalCost, totalRevenue, totalPeople } = summary;
 
-  const totalRevenue = rows.reduce(
-    (sum, row) => sum + Number(row.totalRevenueUsd ?? 0),
-    0,
-  );
+  const revenueMargin =
+    totalPayments > 0 ? (totalRevenue / totalPayments) * 100 : 0;
 
-  const revenuePercentages = rows
-    .map((row) => Number(row.revenuePercentage ?? 0))
-    .filter((value) => !Number.isNaN(value));
+  const formatUsd = (value: string | null) => {
+    if (value == null) return "—";
 
-  const averageRevenuePercentage =
-    revenuePercentages.length > 0
-      ? revenuePercentages.reduce((sum, value) => sum + value, 0) /
-        revenuePercentages.length
-      : 0;
+    return `$${Number(value).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  };
 
   return (
     <main className="space-y-6 p-8">
       <div>
-        <h1 className="text-2xl font-bold">Reports & Statistics</h1>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Reports & Statistics</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Financial overview based on the selected filters.
+            </p>
+          </div>
 
-        <p className="mt-1 text-sm text-gray-500">
-          Financial overview based on the selected filters.
-        </p>
+          <a
+            href={`/api/reports/financials/export?${new URLSearchParams({
+              startDate,
+              endDate,
+              ...(tourTypeId && { tourTypeId }),
+              ...(tourId && { tourId }),
+              ...(status && { status }),
+            }).toString()}`}
+            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+          >
+            Export CSV
+          </a>
+        </div>
       </div>
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-lg border bg-white p-5">
@@ -96,11 +109,9 @@ export default async function ReportsPage({
         </div>
 
         <div className="rounded-lg border bg-white p-5">
-          <p className="text-sm text-gray-500">Average Revenue</p>
-          <p className="mt-2 text-2xl font-bold">
-            {averageRevenuePercentage.toFixed(2)}%
-          </p>
-          <p className="mt-1 text-xs text-gray-400">Average percentage</p>
+          <p className="text-sm text-gray-500">Revenue Margin</p>
+          <p className="mt-2 text-2xl font-bold">{revenueMargin.toFixed(2)}%</p>
+          <p className="mt-1 text-xs text-gray-400">Revenue / Total Payments</p>
         </div>
       </section>
       <section className="rounded-lg border bg-white p-6">
@@ -132,7 +143,9 @@ export default async function ReportsPage({
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
                     Tour
                   </th>
-
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+                    People
+                  </th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
                     Status
                   </th>
@@ -148,6 +161,9 @@ export default async function ReportsPage({
                   <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
                     Revenue (USD)
                   </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+                    Margin
+                  </th>
                 </tr>
               </thead>
 
@@ -161,26 +177,162 @@ export default async function ReportsPage({
                     <td className="px-4 py-3 text-sm font-medium text-gray-900">
                       {row.tourName}
                     </td>
+                    <td className="px-4 py-3 text-right text-sm text-gray-600">
+                      {row.numberOfPeople ?? "—"}
+                    </td>
 
                     <td className="px-4 py-3 text-sm text-gray-600">
                       {row.status}
                     </td>
 
                     <td className="px-4 py-3 text-right text-sm text-gray-600">
-                      {row.totalPaymentUsd ?? "—"}
+                      {formatUsd(row.totalPaymentUsd)}
                     </td>
 
                     <td className="px-4 py-3 text-right text-sm text-gray-600">
-                      {row.totalCostUsd ?? "—"}
+                      {formatUsd(row.totalCostUsd)}
                     </td>
 
                     <td className="px-4 py-3 text-right text-sm text-gray-600">
-                      {row.totalRevenueUsd ?? "—"}
+                      {formatUsd(row.totalRevenueUsd)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-sm text-gray-600">
+                      {row.revenuePercentage != null
+                        ? `${Number(row.revenuePercentage).toFixed(2)}%`
+                        : "—"}
                     </td>
                   </tr>
                 ))}
               </tbody>
+              <tfoot className="border-t bg-gray-50">
+                <tr>
+                  <td
+                    colSpan={2}
+                    className="px-4 py-3 text-sm font-semibold text-gray-900"
+                  >
+                    Total
+                  </td>
+
+                  <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                    {totalPeople}
+                  </td>
+
+                  <td className="px-4 py-3" />
+
+                  <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                    {formatUsd(totalPayments.toFixed(2))}
+                  </td>
+
+                  <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                    {formatUsd(totalCost.toFixed(2))}
+                  </td>
+
+                  <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                    {formatUsd(totalRevenue.toFixed(2))}
+                  </td>
+
+                  <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                    {revenueMargin.toFixed(2)}%
+                  </td>
+                </tr>
+              </tfoot>
             </table>
+            {totalPages > 1 && (
+              <div className="mt-4 flex items-center justify-between border-t pt-4">
+                <p className="text-sm text-gray-500">
+                  Page {page} of {totalPages} ({total} records)
+                </p>
+
+                <div className="flex gap-2">
+                  {totalPages > 1 && (
+                    <div className="mt-4 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm text-gray-500">
+                        Showing{" "}
+                        <span className="font-medium text-gray-700">
+                          {(page - 1) * 20 + 1}
+                        </span>{" "}
+                        –{" "}
+                        <span className="font-medium text-gray-700">
+                          {Math.min(page * 20, total)}
+                        </span>{" "}
+                        of{" "}
+                        <span className="font-medium text-gray-700">
+                          {total}
+                        </span>{" "}
+                        records
+                      </p>
+
+                      <div className="flex items-center gap-1">
+                        {page > 1 ? (
+                          <a
+                            href={`?${new URLSearchParams({
+                              startDate,
+                              endDate,
+                              ...(tourTypeId && { tourTypeId }),
+                              ...(tourId && { tourId }),
+                              ...(status && { status }),
+                              page: String(page - 1),
+                            }).toString()}`}
+                            className="rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
+                          >
+                            Previous
+                          </a>
+                        ) : (
+                          <span className="cursor-not-allowed rounded-md border px-3 py-2 text-sm text-gray-300">
+                            Previous
+                          </span>
+                        )}
+
+                        {Array.from({ length: totalPages }, (_, index) => {
+                          const pageNumber = index + 1;
+
+                          return (
+                            <a
+                              key={pageNumber}
+                              href={`?${new URLSearchParams({
+                                startDate,
+                                endDate,
+                                ...(tourTypeId && { tourTypeId }),
+                                ...(tourId && { tourId }),
+                                ...(status && { status }),
+                                page: String(pageNumber),
+                              }).toString()}`}
+                              className={`rounded-md border px-3 py-2 text-sm ${
+                                pageNumber === page
+                                  ? "bg-gray-900 text-white"
+                                  : "hover:bg-gray-50"
+                              }`}
+                            >
+                              {pageNumber}
+                            </a>
+                          );
+                        })}
+
+                        {page < totalPages ? (
+                          <a
+                            href={`?${new URLSearchParams({
+                              startDate,
+                              endDate,
+                              ...(tourTypeId && { tourTypeId }),
+                              ...(tourId && { tourId }),
+                              ...(status && { status }),
+                              page: String(page + 1),
+                            }).toString()}`}
+                            className="rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
+                          >
+                            Next
+                          </a>
+                        ) : (
+                          <span className="cursor-not-allowed rounded-md border px-3 py-2 text-sm text-gray-300">
+                            Next
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </section>

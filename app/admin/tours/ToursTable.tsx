@@ -23,74 +23,72 @@ interface ToursTableProps {
 
 export default function ToursTable({ tours }: ToursTableProps) {
   return (
-    <div className="overflow-hidden rounded-lg border bg-white">
+    <div className="overflow-hidden rounded-lg  bg-[#1E293B]">
       <table className="min-w-full divide-y">
-        <thead className="bg-gray-50">
+        <thead className="bg-[#3B82F6]">
           <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
               Product ID
             </th>
 
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
               Tour
             </th>
 
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
               Type
             </th>
 
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
               Class
             </th>
 
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
               Duration
             </th>
 
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
               Price
             </th>
 
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
               Status
             </th>
 
-            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+            <th className="px-4 py-3 text-right text-xs font-medium uppercase">
               Actions
             </th>
           </tr>
         </thead>
 
-        <tbody className="divide-y">
+        <tbody>
           {tours.map((tour) => (
-            <tr key={tour.id} className="hover:bg-gray-50">
-              <td className="px-4 py-3 text-sm text-gray-600">
-                {tour.productId ?? "—"}
-              </td>
+            <tr key={tour.id} className="hover:bg-[#2563EB]">
+              <td className="px-4 py-3 text-sm">{tour.productId ?? "—"}</td>
 
               <td className="px-4 py-3">
-                <div className="font-medium text-gray-900">{tour.name}</div>
+                <div className="font-medium">{tour.name}</div>
 
                 {tour.description && (
-                  <div className="max-w-xs truncate text-sm text-gray-500">
+                  <div className="max-w-xs truncate text-sm text-[#94A3B8]">
                     {tour.description}
                   </div>
                 )}
               </td>
 
-              <td className="px-4 py-3 text-sm text-gray-600">
+              <td className="px-4 py-3 text-sm">
                 {tour.tourType?.name ?? "—"}
               </td>
 
-              <td className="px-4 py-3 text-sm text-gray-600">
+              <td className="px-4 py-3 text-sm">
                 {tour.tourClass?.name ?? "—"}
               </td>
 
-              <td className="px-4 py-3 text-sm text-gray-600">
+              <td className="px-4 py-3 text-sm">
                 {tour.duration != null ? `${tour.duration} min` : "—"}
               </td>
 
-              <td className="px-4 py-3 text-sm text-gray-600">
+              <td className="px-4 py-3 text-sm">
                 {tour.price != null ? `$${tour.price}` : "—"}
               </td>
 
@@ -98,8 +96,8 @@ export default function ToursTable({ tours }: ToursTableProps) {
                 <span
                   className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
                     tour.active
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800"
+                      ? "bg-[#10B981] text-green-800"
+                      : "bg-[#64748B] text-gray-800"
                   }`}
                 >
                   {tour.active ? "Active" : "Inactive"}
@@ -110,14 +108,14 @@ export default function ToursTable({ tours }: ToursTableProps) {
                 <div className="flex items-center justify-end gap-3">
                   <Link
                     href={`/admin/tours/${tour.id}`}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                    className="text-sm font-medium text-[#38BDF8]"
                   >
                     View
                   </Link>
 
                   <Link
                     href={`/admin/tours/${tour.id}/edit`}
-                    className="text-sm font-medium text-gray-600 hover:text-gray-900"
+                    className="text-sm font-medium text-[#F59E0B]"
                   >
                     Edit
                   </Link>

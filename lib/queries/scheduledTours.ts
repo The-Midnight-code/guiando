@@ -373,3 +373,14 @@ export async function deleteScheduledTour(externalId: number) {
 
   return deletedScheduledTour;
 }
+
+export async function getScheduledTourStatuses() {
+  const rows = await db
+    .selectDistinct({
+      status: scheduledTours.status,
+    })
+    .from(scheduledTours)
+    .orderBy(asc(scheduledTours.status));
+
+  return rows.map((row) => row.status);
+}

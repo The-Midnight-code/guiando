@@ -7,11 +7,11 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
 
   const styles =
     normalizedStatus === "confirmed"
-      ? "bg-green-100 text-green-800"
+      ? "bg-green-500/15 text-success"
       : normalizedStatus === "pending"
-        ? "bg-yellow-100 text-yellow-800"
+        ? "bg-warning text-warning"
         : normalizedStatus === "cancelled" || normalizedStatus === "canceled"
-          ? "bg-red-100 text-red-800"
+          ? "bg-error text-error"
           : "bg-gray-100 text-gray-800";
 
   return (

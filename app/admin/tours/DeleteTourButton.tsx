@@ -48,7 +48,7 @@ export default function DeleteTourButton({ id, name }: DeleteTourButtonProps) {
       type="button"
       onClick={handleDelete}
       disabled={isDeleting}
-      className="text-red-600 hover:text-red-800 disabled:opacity-50"
+      className="text-[#EF4444]  disabled:opacity-50"
     >
       {isDeleting ? "Deleting..." : "Delete"}
     </button>

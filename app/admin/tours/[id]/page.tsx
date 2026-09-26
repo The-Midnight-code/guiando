@@ -28,22 +28,22 @@ export default async function TourDetailsPage({
     <main className="p-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{tour.name}</h1>
+          <h1 className="text-2xl font-bold text-[#F8FAFC]">{tour.name}</h1>
 
-          <p className="mt-1 text-sm text-gray-500">Tour details</p>
+          <p className="mt-1 text-sm text-[#94A3B8]">Tour details</p>
         </div>
 
         <div className="flex items-center gap-3">
           <Link
             href="/admin/tours"
-            className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50"
+            className="rounded-md  px-4 py-2 text-sm font-medium bg-[#3B82F6]"
           >
             Back
           </Link>
 
           <Link
             href={`/admin/tours/${tour.id}/edit`}
-            className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+            className="rounded-md bg-[#60A5FA] px-4 py-2 text-sm font-medium"
           >
             Edit
           </Link>

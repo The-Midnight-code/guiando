@@ -6,9 +6,9 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="flex min-h-screen">
-        <aside className="w-64 border-r bg-white">
+        <aside className="w-64 border-r">
           <div className="border-b px-6 py-5">
             <h1 className="text-xl font-bold">Guiando</h1>
             <p className="text-sm text-gray-500">Admin Panel</p>
@@ -65,7 +65,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex h-16 items-center justify-between border-b bg-white px-6">
+          <header className="flex h-16 items-center justify-between border-b px-6">
             <div>
               <span className="text-sm font-medium text-gray-700">
                 Administration

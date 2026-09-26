@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { FiEdit } from "react-icons/fi";
+import { CiViewList } from "react-icons/ci";
 
 interface ScheduledTourActionsProps {
   externalId: number;
@@ -13,21 +15,20 @@ export default function ScheduledTourActions({
 
   return (
     <div className="flex items-center gap-2">
-      <button
+      <CiViewList
         type="button"
         onClick={() => router.push(`/admin/scheduled-tours/${externalId}`)}
-        className="rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-gray-50"
+        className="text-blue text-2xl"
       >
         View
-      </button>
+      </CiViewList>
 
-      <button
-        type="button"
+      <FiEdit
         onClick={() => router.push(`/admin/scheduled-tours/${externalId}/edit`)}
-        className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+        className="text-blue text-lg"
       >
         Edit
-      </button>
+      </FiEdit>
     </div>
   );
 }

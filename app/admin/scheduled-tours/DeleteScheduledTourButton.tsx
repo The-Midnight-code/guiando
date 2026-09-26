@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { deleteScheduledTourAction } from "./actions";
-
+import { FiTrash2 } from "react-icons/fi";
 interface DeleteScheduledTourButtonProps {
   externalId: number;
 }
@@ -48,15 +48,10 @@ export default function DeleteScheduledTourButton({
 
   return (
     <div>
-      <button
-        type="button"
+      <FiTrash2
         onClick={handleDelete}
-        disabled={isDeleting}
-        className="rounded-md bg-red-600 px-3 py-2 text-sm text-white disabled:opacity-50"
-      >
-        {isDeleting ? "Deleting..." : "Delete"}
-      </button>
-
+        className="text-error text-lg"
+      ></FiTrash2>
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );

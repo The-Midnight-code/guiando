@@ -1,5 +1,5 @@
 import { db } from "@/db/db";
-import { eq } from "drizzle-orm";
+import { eq, and, asc } from "drizzle-orm";
 
 import { tours } from "@/db/schema";
 
@@ -13,17 +13,21 @@ export async function getTours() {
   });
 }
 
-export async function getActiveTours() {
-  return db.query.tours.findMany({
-    where: {
-      active: true,
-    },
-    with: {
-      tourType: true,
-      tourClass: true,
-      photos: true,
-    },
-  });
+export async function getActiveTours(tourTypeId?: string) {
+  const conditions = [eq(tours.active, true)];
+
+  if (tourTypeId) {
+    conditions.push(eq(tours.tourTypeId, tourTypeId));
+  }
+
+  return db
+    .select({
+      id: tours.id,
+      name: tours.name,
+    })
+    .from(tours)
+    .where(and(...conditions))
+    .orderBy(asc(tours.name));
 }
 
 export async function getTourById(id: string) {

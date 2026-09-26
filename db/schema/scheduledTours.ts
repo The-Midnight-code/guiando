@@ -8,8 +8,6 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { asc, sql } from "drizzle-orm";
-import { db } from "@/db/db";
 
 import { pickupLocations } from "./pickupLocations";
 import { tours } from "./tours";
@@ -63,14 +61,3 @@ export const scheduledTours = pgTable("scheduled_tours", {
 
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
-
-export async function getScheduledTourStatuses() {
-  const rows = await db
-    .selectDistinct({
-      status: scheduledTours.status,
-    })
-    .from(scheduledTours)
-    .orderBy(asc(scheduledTours.status));
-
-  return rows.map((row) => row.status);
-}

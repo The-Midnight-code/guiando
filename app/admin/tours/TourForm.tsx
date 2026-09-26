@@ -132,13 +132,13 @@ export default function TourForm({
   };
 
   return (
-    <section className="rounded-lg bg-white p-6 shadow-sm">
+    <section className="rounded-lg bg-[#1E2A38] p-6 shadow-sm">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">
+        <h1 className="text-xl font-semibold text-[#F8FAFC]">
           {initialData ? "Edit Tour" : "Create Tour"}
         </h1>
 
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-[#94A3B8]">
           {initialData ? "Update the tour information." : "Create a new tour."}
         </p>
       </div>
@@ -148,7 +148,7 @@ export default function TourForm({
           <div>
             <label
               htmlFor="name"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-[#F8FAFC]"
             >
               Name
             </label>
@@ -160,14 +160,14 @@ export default function TourForm({
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-[#334155] px-3 py-2 text-sm"
             />
           </div>
 
           <div>
             <label
               htmlFor="productId"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-[#F8FAFC]"
             >
               Product ID
             </label>
@@ -178,14 +178,14 @@ export default function TourForm({
               type="text"
               value={formData.productId}
               onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-[#334155] px-3 py-2 text-sm"
             />
           </div>
 
           <div className="md:col-span-2">
             <label
               htmlFor="description"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-[#F8FAFC]"
             >
               Description
             </label>
@@ -196,14 +196,14 @@ export default function TourForm({
               rows={4}
               value={formData.description}
               onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-[#334155] px-3 py-2 text-sm"
             />
           </div>
 
           <div>
             <label
               htmlFor="tourTypeId"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-[#F8FAFC]"
             >
               Tour Type
             </label>
@@ -214,7 +214,7 @@ export default function TourForm({
               value={formData.tourTypeId}
               onChange={handleChange}
               required
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-[#334155] px-3 py-2 text-sm"
             >
               <option value="">Select tour type</option>
 
@@ -229,7 +229,7 @@ export default function TourForm({
           <div>
             <label
               htmlFor="tourClassId"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-[#F8FAFC]"
             >
               Tour Class
             </label>
@@ -239,7 +239,7 @@ export default function TourForm({
               name="tourClassId"
               value={formData.tourClassId}
               onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-[#334155] px-3 py-2 text-sm"
             >
               <option value="">Select tour class</option>
 
@@ -254,7 +254,7 @@ export default function TourForm({
           <div>
             <label
               htmlFor="duration"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-[#F8FAFC]"
             >
               Duration (minutes)
             </label>
@@ -266,14 +266,14 @@ export default function TourForm({
               min="1"
               value={formData.duration}
               onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-[#334155] px-3 py-2 text-sm"
             />
           </div>
 
           <div>
             <label
               htmlFor="price"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-[#F8FAFC]"
             >
               Price (USD)
             </label>
@@ -286,7 +286,7 @@ export default function TourForm({
               step="0.01"
               value={formData.price}
               onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-[#334155] px-3 py-2 text-sm"
             />
           </div>
         </div>
@@ -300,7 +300,10 @@ export default function TourForm({
             onChange={handleActiveChange}
           />
 
-          <label htmlFor="active" className="text-sm font-medium text-gray-700">
+          <label
+            htmlFor="active"
+            className="text-sm font-medium text-[#F8FAFC]"
+          >
             Active
           </label>
         </div>
@@ -311,7 +314,7 @@ export default function TourForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="rounded-md bg-[#3B82F6] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
             {isSubmitting
               ? "Saving..."
@@ -323,7 +326,7 @@ export default function TourForm({
           <button
             type="button"
             onClick={() => router.push("/admin/tours")}
-            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700"
+            className="rounded-md border border-[#334155] px-4 py-2 text-sm font-medium text-[#F8FAFC] bg-[#EF4444]"
           >
             Cancel
           </button>

@@ -1,5 +1,5 @@
 import { db } from "@/db/db";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 
 import { tourTypes } from "@/db/schema";
 
@@ -12,14 +12,14 @@ export async function getTourTypes() {
 }
 
 export async function getActiveTourTypes() {
-  return db.query.tourTypes.findMany({
-    where: {
-      active: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
+  return db
+    .select({
+      id: tourTypes.id,
+      name: tourTypes.name,
+    })
+    .from(tourTypes)
+    .where(eq(tourTypes.active, true))
+    .orderBy(asc(tourTypes.name));
 }
 
 export async function getTourTypeById(id: string) {
