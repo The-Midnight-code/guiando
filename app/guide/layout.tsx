@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
+import GuideNav from "@/components/guide/GuideNav";
 
 interface GuideLayoutProps {
   children: React.ReactNode;
@@ -9,7 +10,7 @@ export default function GuideLayout({ children }: GuideLayoutProps) {
   return (
     <div className="min-h-screen">
       <header className="border-b">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <Link
             href="/guide/dashboard"
             className="text-lg font-semibold hover:underline"
@@ -17,16 +18,10 @@ export default function GuideLayout({ children }: GuideLayoutProps) {
             Guiando
           </Link>
 
-          <nav className="flex items-center gap-6 text-sm">
-            <Link href="/guide/dashboard" className="hover:underline">
-              Dashboard
-            </Link>
-
-            <Link href="/guide/scheduled-tours" className="hover:underline">
-              Scheduled Tours
-            </Link>
+          <div className="flex items-center justify-between gap-4 sm:gap-6">
+            <GuideNav />
             <UserButton />
-          </nav>
+          </div>
         </div>
       </header>
 
