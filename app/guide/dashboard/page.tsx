@@ -11,14 +11,12 @@ import StatusBadge from "@/app/admin/scheduled-tours/StatusBadge";
 
 export default async function GuideDashboardPage() {
   const { userId } = await auth();
-  console.log("Clerk userId:", userId);
 
   if (!userId) {
     redirect("/sign-in");
   }
 
   const user = await getUserByClerkId(userId);
-  console.log("DB user:", user);
 
   if (!user) {
     redirect("/guide");

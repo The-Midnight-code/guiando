@@ -33,6 +33,18 @@ export default async function GuideScheduledToursPage({
 
   const tours = await getGuideScheduledTours(user.id, status, search);
 
+  const detailQuery = new URLSearchParams();
+
+  if (status) {
+    detailQuery.set("status", status);
+  }
+
+  if (search) {
+    detailQuery.set("search", search);
+  }
+
+  const detailQueryString = detailQuery.toString();
+
   return (
     <main className="space-y-6 p-8">
       <div>
@@ -73,8 +85,8 @@ export default async function GuideScheduledToursPage({
                     <td className="px-6 py-4 font-medium">
                       <Link
                         href={
-                          status
-                            ? `/guide/scheduled-tours/${tour.id}?status=${status}`
+                          detailQueryString
+                            ? `/guide/scheduled-tours/${tour.id}?${detailQueryString}`
                             : `/guide/scheduled-tours/${tour.id}`
                         }
                         className="hover:underline"
@@ -93,8 +105,8 @@ export default async function GuideScheduledToursPage({
                     <td className="px-6 py-4">
                       <Link
                         href={
-                          status
-                            ? `/guide/scheduled-tours/${tour.id}?status=${status}`
+                          detailQueryString
+                            ? `/guide/scheduled-tours/${tour.id}?${detailQueryString}`
                             : `/guide/scheduled-tours/${tour.id}`
                         }
                         className="hover:underline"

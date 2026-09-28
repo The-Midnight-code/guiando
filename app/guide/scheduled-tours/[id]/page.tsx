@@ -13,6 +13,7 @@ interface ScheduledTourPageProps {
   }>;
   searchParams: Promise<{
     status?: string;
+    search?: string;
   }>;
 }
 
@@ -33,7 +34,7 @@ export default async function GuideScheduledTourPage({
   }
 
   const { id } = await params;
-  const { status } = await searchParams;
+  const { status, search } = await searchParams;
 
   const scheduledTour = await getScheduledTourByUuid(id, user.id);
 
@@ -43,12 +44,24 @@ export default async function GuideScheduledTourPage({
 
   const tour = scheduledTour.tour;
 
+  const backParams = new URLSearchParams();
+
+  if (status) {
+    backParams.set("status", status);
+  }
+
+  if (search) {
+    backParams.set("search", search);
+  }
+
+  const backQueryString = backParams.toString();
+
   return (
     <main className="space-y-6 p-8">
       <Link
         href={
-          status
-            ? `/guide/scheduled-tours?status=${status}`
+          backQueryString
+            ? `/guide/scheduled-tours?${backQueryString}`
             : "/guide/scheduled-tours"
         }
         className="text-sm font-medium hover:underline"

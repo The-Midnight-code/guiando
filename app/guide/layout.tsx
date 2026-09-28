@@ -1,12 +1,28 @@
+import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
+
 import GuideNav from "@/components/guide/GuideNav";
+import { getUserByClerkId } from "@/lib/queries/users";
 
 interface GuideLayoutProps {
   children: React.ReactNode;
 }
 
-export default function GuideLayout({ children }: GuideLayoutProps) {
+export default async function GuideLayout({ children }: GuideLayoutProps) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  const user = await getUserByClerkId(userId);
+
+  if (!user || user.role !== "GUIDE") {
+    redirect("/guide");
+  }
+
   return (
     <div className="min-h-screen">
       <header className="border-b">
