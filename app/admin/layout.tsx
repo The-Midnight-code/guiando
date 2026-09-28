@@ -1,10 +1,26 @@
 import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+
+import { getUserByClerkId } from "@/lib/queries/users";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
+export default async function AdminLayout({ children }: AdminLayoutProps) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  const user = await getUserByClerkId(userId);
+
+  if (!user || user.role !== "ADMIN") {
+    redirect("/guide/dashboard");
+  }
+
   return (
     <div className="min-h-screen">
       <div className="flex min-h-screen">

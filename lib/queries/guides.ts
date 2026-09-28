@@ -130,7 +130,10 @@ export async function getGuideDashboardStats(userId: string) {
         and(
           eq(guides.userId, userId),
           gte(scheduledTours.tourDate, today),
-          ne(scheduledTours.status, "cancelled"),
+          or(
+            eq(scheduledTours.status, "PENDING"),
+            eq(scheduledTours.status, "CONFIRMED"),
+          ),
         ),
       ),
 

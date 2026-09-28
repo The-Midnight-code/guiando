@@ -15,8 +15,8 @@ export default function GuideNav() {
         href="/guide/dashboard"
         className={
           isDashboard
-            ? "font-medium underline underline-offset-4"
-            : "hover:underline"
+            ? "font-medium text-primary"
+            : "text-muted-foreground transition-colors hover:text-foreground"
         }
       >
         Dashboard
@@ -26,8 +26,8 @@ export default function GuideNav() {
         href="/guide/scheduled-tours"
         className={
           isScheduledTours
-            ? "font-medium underline underline-offset-4"
-            : "hover:underline"
+            ? "font-medium text-primary"
+            : "text-muted-foreground transition-colors hover:text-foreground"
         }
       >
         Scheduled Tours

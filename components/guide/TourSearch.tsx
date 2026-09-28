@@ -10,7 +10,7 @@ export default function TourSearch({ value, status }: TourSearchProps) {
     <form
       action="/guide/scheduled-tours"
       method="get"
-      className="flex items-center gap-3"
+      className="flex w-full flex-col gap-3 sm:flex-row sm:items-center"
     >
       {status && <input type="hidden" name="status" value={status} />}
 
@@ -19,12 +19,12 @@ export default function TourSearch({ value, status }: TourSearchProps) {
         name="search"
         defaultValue={value ?? ""}
         placeholder="Search tours..."
-        className="rounded-md border bg-background px-3 py-2 text-sm"
+        className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary sm:w-64"
       />
 
       <button
         type="submit"
-        className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
+        className="w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted sm:w-auto"
       >
         Search
       </button>

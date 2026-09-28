@@ -27,7 +27,7 @@ export default function StatusFilter({ value, search }: StatusFilterProps) {
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex w-full items-center gap-3 sm:w-auto">
       <label htmlFor="status" className="text-sm font-medium">
         Status
       </label>
@@ -36,7 +36,7 @@ export default function StatusFilter({ value, search }: StatusFilterProps) {
         id="status"
         value={value ?? "all"}
         onChange={handleChange}
-        className="rounded-md border bg-background px-3 py-2 text-sm"
+        className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary sm:w-auto"
       >
         <option value="all">All</option>
         <option value="PENDING">Pending</option>

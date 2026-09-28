@@ -57,185 +57,277 @@ export default async function GuideScheduledTourPage({
   const backQueryString = backParams.toString();
 
   return (
-    <main className="space-y-6 p-8">
-      <Link
-        href={
-          backQueryString
-            ? `/guide/scheduled-tours?${backQueryString}`
-            : "/guide/scheduled-tours"
-        }
-        className="text-sm font-medium hover:underline"
-      >
-        ← Back to Scheduled Tours
-      </Link>
-      <div>
-        <p className="text-sm text-gray-500">
-          Scheduled Tour #{scheduledTour.externalId}
-        </p>
+    <main className="space-y-8 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="space-y-5">
+        <Link
+          href={
+            backQueryString
+              ? `/guide/scheduled-tours?${backQueryString}`
+              : "/guide/scheduled-tours"
+          }
+          className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-card-secondary hover:text-foreground"
+        >
+          <span aria-hidden="true">←</span>
+          <span>Back to Scheduled Tours</span>
+        </Link>
+        <div className="flex flex-col gap-4 rounded-xl border bg-card p-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <h1 className="text-2xl font-semibold tracking-tight">
+                {tour?.name}
+              </h1>
 
-        <h1 className="text-3xl font-bold">{tour?.name}</h1>
+              <StatusBadge status={scheduledTour.status} />
+            </div>
 
-        <p className="mt-1 text-gray-500">
-          {tour?.description ?? "No description available"}
-        </p>
-      </div>
-      <div className="flex items-center gap-3">
-        <StatusBadge status={scheduledTour.status} />
+            <div className="flex flex-col gap-1 text-sm text-muted-foreground sm:flex-row sm:gap-4">
+              <span>{scheduledTour.tourDate}</span>
 
-        {scheduledTour.status === "CONFIRMED" && (
-          <CompleteTourButton id={scheduledTour.id} />
-        )}
-      </div>
+              <span className="hidden sm:inline">•</span>
 
-      <section className="rounded-lg border p-6">
-        <h2 className="mb-4 text-xl font-semibold">Tour Information</h2>
+              <span>
+                {scheduledTour.startTime ?? "-"}
+                {scheduledTour.endTime ? ` - ${scheduledTour.endTime}` : ""}
+              </span>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <div>
-            <p className="text-sm text-gray-500">Tour Type</p>
-            <p className="font-medium">{tour?.tourType?.name ?? "N/A"}</p>
+              <span className="hidden sm:inline">•</span>
+
+              <span>{scheduledTour.pickupLocation?.name ?? "-"}</span>
+            </div>
           </div>
 
-          <div>
-            <p className="text-sm text-gray-500">Tour Class</p>
-            <p className="font-medium">{tour?.tourClass?.name ?? "N/A"}</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500">Status</p>
-            <StatusBadge status={scheduledTour.status} />
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-lg border p-6">
-        <h2 className="mb-4 text-xl font-semibold">Schedule</h2>
-
-        <div className="grid gap-4 md:grid-cols-4">
-          <div>
-            <p className="text-sm text-gray-500">Tour Date</p>
-            <p className="font-medium">{scheduledTour.tourDate}</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500">Start Time</p>
-            <p className="font-medium">{scheduledTour.startTime ?? "N/A"}</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500">End Time</p>
-            <p className="font-medium">{scheduledTour.endTime ?? "N/A"}</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500">People</p>
-            <p className="font-medium">{scheduledTour.numberOfPeople ?? 0}</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-lg border p-6">
-        <h2 className="mb-4 text-xl font-semibold">Pickup Information</h2>
-
-        <div className="space-y-2">
-          <p>
-            <strong>Location:</strong>{" "}
-            {scheduledTour.pickupLocation?.name ?? "N/A"}
-          </p>
-
-          <p>
-            <strong>Address:</strong>{" "}
-            {scheduledTour.pickupLocation?.address ?? "N/A"}
-          </p>
-
-          {scheduledTour.pickupLocation?.instructions && (
-            <p>
-              <strong>Instructions:</strong>{" "}
-              {scheduledTour.pickupLocation.instructions}
-            </p>
+          {scheduledTour.status === "CONFIRMED" && (
+            <CompleteTourButton id={scheduledTour.id} />
           )}
-
-          <p>
-            <strong>Start:</strong> {scheduledTour.locationStart ?? "N/A"}
+        </div>
+      </div>
+      <section className="rounded-xl border bg-card">
+        <div className="border-b px-6 py-5">
+          <h2 className="font-semibold">Tour Information</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Information about the tour
           </p>
+        </div>
 
-          <p>
-            <strong>End:</strong> {scheduledTour.locationEnd ?? "N/A"}
+        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Tour
+            </p>
+            <p className="mt-1 font-medium">{tour?.name}</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Tour Type
+            </p>
+            <p className="mt-1">{tour?.tourType?.name ?? "-"}</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Tour Class
+            </p>
+            <p className="mt-1">{tour?.tourClass?.name ?? "-"}</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Duration
+            </p>
+            <p className="mt-1">{tour?.duration ?? "-"}</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Price
+            </p>
+            <p className="mt-1 font-medium">{tour?.price ?? "-"}</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Product ID
+            </p>
+            <p className="mt-1">{tour?.productId}</p>
+          </div>
+        </div>
+
+        {tour?.description && (
+          <div className="border-t px-6 py-5">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Description
+            </p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              {tour.description}
+            </p>
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-xl border bg-card">
+        <div className="border-b px-6 py-5">
+          <h2 className="font-semibold">Schedule</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Date and time information
           </p>
+        </div>
+
+        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Tour Date
+            </p>
+            <p className="mt-1 font-medium">{scheduledTour.tourDate}</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Start Time
+            </p>
+            <p className="mt-1">{scheduledTour.startTime ?? "-"}</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              End Time
+            </p>
+            <p className="mt-1">{scheduledTour.endTime ?? "-"}</p>
+          </div>
         </div>
       </section>
 
-      <section className="rounded-lg border p-6">
-        <h2 className="mb-4 text-xl font-semibold">Booking Information</h2>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          <div>
-            <p className="text-sm text-gray-500">Affiliate</p>
-            <p className="font-medium">
-              {scheduledTour.affiliate?.name ?? "N/A"}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500">Payment Type</p>
-            <p className="font-medium">
-              {scheduledTour.paymentType?.name ?? "N/A"}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500">Special Indications</p>
-            <p className="font-medium">
-              {scheduledTour.specialIndications ?? "N/A"}
-            </p>
-          </div>
-        </div>
-      </section>
-      <section className="rounded-lg border p-6">
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold">Travelers</h2>
-          <p className="text-sm text-gray-500">
-            Travelers assigned to this tour.
+      <section className="rounded-xl border bg-card">
+        <div className="border-b px-6 py-5">
+          <h2 className="font-semibold">Pickup Information</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Pickup location and tour route
           </p>
         </div>
 
-        {scheduledTour.travelerAssignments.filter(
-          (assignment) => assignment.traveler !== null,
-        ).length === 0 ? (
-          <p className="text-sm text-gray-500">No travelers assigned.</p>
+        <div className="grid gap-6 p-6 sm:grid-cols-2">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Pickup Location
+            </p>
+            <p className="mt-1 font-medium">
+              {scheduledTour.pickupLocation?.name ?? "-"}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Start Location
+            </p>
+            <p className="mt-1">{scheduledTour.locationStart ?? "-"}</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              End Location
+            </p>
+            <p className="mt-1">{scheduledTour.locationEnd ?? "-"}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-xl border bg-card">
+        <div className="border-b px-6 py-5">
+          <h2 className="font-semibold">Booking Information</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Booking and payment details
+          </p>
+        </div>
+
+        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Booking Date
+            </p>
+            <p className="mt-1 font-medium">
+              {scheduledTour.bookingDate ?? "-"}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Affiliate
+            </p>
+            <p className="mt-1">{scheduledTour.affiliate?.name ?? "-"}</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Payment Type
+            </p>
+            <p className="mt-1">{scheduledTour.paymentType?.name ?? "-"}</p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Number of People
+            </p>
+            <p className="mt-1 font-medium">
+              {scheduledTour.numberOfPeople ?? 0}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              External ID
+            </p>
+            <p className="mt-1">{scheduledTour.externalId}</p>
+          </div>
+        </div>
+      </section>
+      <section className="overflow-hidden rounded-xl border bg-card">
+        <div className="border-b px-6 py-5">
+          <h2 className="font-semibold">Travelers</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Travelers assigned to this tour
+          </p>
+        </div>
+
+        {scheduledTour.travelerAssignments.length === 0 ? (
+          <div className="px-6 py-10 text-center">
+            <p className="text-sm font-medium">No travelers assigned</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              There are currently no travelers associated with this tour.
+            </p>
+          </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left">
-                  <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Email</th>
-                  <th className="px-4 py-3 font-medium">Phone</th>
-                </tr>
-              </thead>
+          <div className="divide-y">
+            {scheduledTour.travelerAssignments.map(({ traveler }) => (
+              <div
+                key={traveler?.id}
+                className="grid gap-4 px-6 py-5 sm:grid-cols-3"
+              >
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Name
+                  </p>
+                  <p className="mt-1 font-medium">
+                    {traveler?.firstName} {traveler?.lastName}
+                  </p>
+                </div>
 
-              <tbody>
-                {scheduledTour.travelerAssignments.map((assignment) => {
-                  const traveler = assignment.traveler;
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Email
+                  </p>
+                  <p className="mt-1 break-words text-sm">
+                    {traveler?.email ?? "-"}
+                  </p>
+                </div>
 
-                  if (!traveler) {
-                    return null;
-                  }
-
-                  return (
-                    <tr key={traveler.id} className="border-b last:border-0">
-                      <td className="px-4 py-3 font-medium">
-                        {traveler.firstName} {traveler.lastName}
-                      </td>
-
-                      <td className="px-4 py-3">{traveler.email ?? "-"}</td>
-
-                      <td className="px-4 py-3">{traveler.phone ?? "-"}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Phone
+                  </p>
+                  <p className="mt-1 text-sm">{traveler?.phone ?? "-"}</p>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </section>
