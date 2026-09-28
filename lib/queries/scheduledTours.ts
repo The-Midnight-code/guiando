@@ -248,14 +248,6 @@ export async function getScheduledToursForAdmin({
     pageSize,
     totalPages: Math.ceil(total / pageSize),
   };
-
-  return {
-    items,
-    total: totalResult[0]?.count ?? 0,
-    page,
-    pageSize,
-    totalPages: Math.ceil(Number(totalResult[0]?.count ?? 0) / pageSize),
-  };
 }
 
 export async function getScheduledTourById(externalId: number) {
@@ -383,4 +375,62 @@ export async function getScheduledTourStatuses() {
     .orderBy(asc(scheduledTours.status));
 
   return rows.map((row) => row.status);
+}
+
+export async function getScheduledTourByUuid(id: string, userId: string) {
+  return db.query.scheduledTours.findFirst({
+    where: {
+      id,
+      guideAssignments: {
+        guide: {
+          userId,
+        },
+      },
+    },
+    with: {
+      tour: {
+        with: {
+          tourType: true,
+          tourClass: true,
+          photos: true,
+        },
+      },
+      pickupLocation: true,
+      affiliate: true,
+      paymentType: true,
+      travelerAssignments: {
+        with: {
+          traveler: true,
+        },
+      },
+    },
+  });
+}
+
+export async function completeScheduledTour(id: string, userId: string) {
+  const assignedTour = await db.query.scheduledTours.findFirst({
+    where: {
+      id,
+      guideAssignments: {
+        guide: {
+          userId,
+        },
+      },
+    },
+  });
+
+  if (!assignedTour) {
+    return null;
+  }
+
+  const [updatedTour] = await db
+    .update(scheduledTours)
+    .set({
+      status: "COMPLETED",
+      updatedAt: new Date(),
+    })
+    .where(eq(scheduledTours.id, id))
+    .returning();
+
+  return updatedTour;
 }

@@ -1,6 +1,13 @@
-import { count } from "drizzle-orm";
+import { count, asc, eq, gte, ne, and } from "drizzle-orm";
 
-import { guides, scheduledTours, travelers, tours } from "@/db/schema";
+import {
+  guides,
+  scheduledTours,
+  travelers,
+  tours,
+  scheduledTourGuides,
+  users,
+} from "@/db/schema";
 
 import { db } from "@/db/db";
 
@@ -9,17 +16,48 @@ export async function getAdminDashboardStats() {
     await Promise.all([
       db.select({ count: count() }).from(scheduledTours),
 
-      db.select({ count: count() }).from(tours),
+      db.select({ count: count() }).from(tours).where(eq(tours.active, true)),
 
       db.select({ count: count() }).from(guides),
-
       db.select({ count: count() }).from(travelers),
     ]);
 
   return {
     scheduledTours: Number(scheduledToursResult[0]?.count ?? 0),
-    tours: Number(toursResult[0]?.count ?? 0),
+    activeTours: Number(toursResult[0]?.count ?? 0),
     guides: Number(guidesResult[0]?.count ?? 0),
     travelers: Number(travelersResult[0]?.count ?? 0),
   };
+}
+
+export async function getUpcomingTours(limit = 5) {
+  const today = new Date().toISOString().split("T")[0];
+
+  return db
+    .select({
+      id: scheduledTours.id,
+      externalId: scheduledTours.externalId,
+      tourDate: scheduledTours.tourDate,
+      status: scheduledTours.status,
+      tourName: tours.name,
+      numberOfPeople: scheduledTours.numberOfPeople,
+      guideFirstName: users.firstName,
+      guideLastName: users.lastName,
+    })
+    .from(scheduledTours)
+    .innerJoin(tours, eq(scheduledTours.tourId, tours.id))
+    .leftJoin(
+      scheduledTourGuides,
+      eq(scheduledTourGuides.scheduledTourId, scheduledTours.id),
+    )
+    .leftJoin(guides, eq(guides.id, scheduledTourGuides.guideId))
+    .leftJoin(users, eq(users.id, guides.userId))
+    .where(
+      and(
+        gte(scheduledTours.tourDate, today),
+        ne(scheduledTours.status, "cancelled"),
+      ),
+    )
+    .orderBy(asc(scheduledTours.tourDate))
+    .limit(limit);
 }

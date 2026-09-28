@@ -1,9 +1,13 @@
 import Link from "next/link";
 
-import { getAdminDashboardStats } from "@/lib/queries/admin";
+import { getAdminDashboardStats, getUpcomingTours } from "@/lib/queries/admin";
+import StatusBadge from "./scheduled-tours/StatusBadge";
 
 export default async function AdminDashboardPage() {
-  const stats = await getAdminDashboardStats();
+  const [stats, upcomingTours] = await Promise.all([
+    getAdminDashboardStats(),
+    getUpcomingTours(),
+  ]);
 
   const cards = [
     {
@@ -13,7 +17,7 @@ export default async function AdminDashboardPage() {
     },
     {
       title: "Tours",
-      value: stats.tours,
+      value: stats.activeTours,
       href: "/admin/tours",
     },
     {
@@ -51,6 +55,117 @@ export default async function AdminDashboardPage() {
           </Link>
         ))}
       </div>
+      <section className="mt-8 rounded-2xl border bg-white p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Upcoming Tours</h2>
+
+            <p className="mt-1 text-sm text-gray-500">
+              Your next scheduled tours.
+            </p>
+          </div>
+
+          <Link
+            href="/admin/scheduled-tours"
+            className="text-sm font-medium hover:underline"
+          >
+            View all
+          </Link>
+        </div>
+
+        {upcomingTours.length === 0 ? (
+          <p className="py-6 text-center text-sm text-gray-500">
+            No upcoming tours found.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y">
+              <thead>
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                    Date
+                  </th>
+
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                    Tour
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                    Status
+                  </th>
+
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                    Guide
+                  </th>
+
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+                    People
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y">
+                {upcomingTours.map((tour) => {
+                  const guideName =
+                    [tour.guideFirstName, tour.guideLastName]
+                      .filter(Boolean)
+                      .join(" ") || "Unassigned";
+
+                  return (
+                    <tr
+                      key={tour.id}
+                      className="cursor-pointer transition hover:bg-gray-50"
+                    >
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        <Link
+                          href={`/admin/scheduled-tours/${tour.externalId}`}
+                          className="block"
+                        >
+                          {tour.tourDate}
+                        </Link>
+                      </td>
+
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                        <Link
+                          href={`/admin/scheduled-tours/${tour.externalId}`}
+                          className="block"
+                        >
+                          {tour.tourName}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <Link
+                          href={`/admin/scheduled-tours/${tour.externalId}`}
+                          className="block"
+                        >
+                          <StatusBadge status={tour.status} />
+                        </Link>
+                      </td>
+
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        <Link
+                          href={`/admin/scheduled-tours/${tour.externalId}`}
+                          className="block"
+                        >
+                          {guideName}
+                        </Link>
+                      </td>
+
+                      <td className="px-4 py-3 text-right text-sm text-gray-600">
+                        <Link
+                          href={`/admin/scheduled-tours/${tour.externalId}`}
+                          className="block"
+                        >
+                          {tour.numberOfPeople ?? "—"}
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </main>
   );
 }
