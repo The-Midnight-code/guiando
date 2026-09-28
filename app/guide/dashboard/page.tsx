@@ -65,10 +65,13 @@ export default async function GuideDashboardPage() {
             View all
           </Link>
         </div>
-
         {upcomingTours.length === 0 ? (
-          <div className="px-6 py-10 text-center text-sm text-muted-foreground">
-            You have no upcoming tours.
+          <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+            <p className="text-sm font-medium">No upcoming tours</p>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              You currently have no tours assigned to you.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
