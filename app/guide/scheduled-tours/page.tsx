@@ -3,10 +3,20 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 import { getUserByClerkId } from "@/lib/queries/users";
-import { getGuideUpcomingTours } from "@/lib/queries/guides";
+import { getGuideScheduledTours } from "@/lib/queries/guides";
 import StatusBadge from "@/components/ui/StatusBadge";
+import StatusFilter from "@/components/guide/StatusFilter";
+import TourSearch from "@/components/guide/TourSearch";
 
-export default async function GuideScheduledToursPage() {
+interface GuideScheduledToursPageProps {
+  searchParams: Promise<{
+    status?: string;
+    search?: string;
+  }>;
+}
+export default async function GuideScheduledToursPage({
+  searchParams,
+}: GuideScheduledToursPageProps) {
   const { userId } = await auth();
 
   if (!userId) {
@@ -19,7 +29,9 @@ export default async function GuideScheduledToursPage() {
     redirect("/guide");
   }
 
-  const tours = await getGuideUpcomingTours(user.id, 50);
+  const { status, search } = await searchParams;
+
+  const tours = await getGuideScheduledTours(user.id, status, search);
 
   return (
     <main className="space-y-6 p-8">
@@ -29,7 +41,11 @@ export default async function GuideScheduledToursPage() {
           Tours assigned to you.
         </p>
       </div>
+      <div className="flex items-center justify-between gap-4">
+        <TourSearch value={search} status={status} />
 
+        <StatusFilter value={status} search={search} />
+      </div>
       <section className="rounded-lg border bg-card">
         {tours.length === 0 ? (
           <div className="px-6 py-10 text-center text-sm text-muted-foreground">
@@ -44,7 +60,7 @@ export default async function GuideScheduledToursPage() {
                   <th className="px-6 py-3 font-medium">Tour</th>
                   <th className="px-6 py-3 font-medium">Time</th>
                   <th className="px-6 py-3 font-medium">Pickup</th>
-                  <th className="px-6 py-3 font-medium">People</th>
+                  <th className="px-6 py-3 font-medium">Travelers</th>
                   <th className="px-6 py-3 font-medium">Status</th>
                 </tr>
               </thead>
@@ -56,7 +72,11 @@ export default async function GuideScheduledToursPage() {
 
                     <td className="px-6 py-4 font-medium">
                       <Link
-                        href={`/guide/scheduled-tours/${tour.id}`}
+                        href={
+                          status
+                            ? `/guide/scheduled-tours/${tour.id}?status=${status}`
+                            : `/guide/scheduled-tours/${tour.id}`
+                        }
                         className="hover:underline"
                       >
                         {tour.tourName}
@@ -70,7 +90,18 @@ export default async function GuideScheduledToursPage() {
 
                     <td className="px-6 py-4">{tour.pickupLocation}</td>
 
-                    <td className="px-6 py-4">{tour.numberOfPeople ?? 0}</td>
+                    <td className="px-6 py-4">
+                      <Link
+                        href={
+                          status
+                            ? `/guide/scheduled-tours/${tour.id}?status=${status}`
+                            : `/guide/scheduled-tours/${tour.id}`
+                        }
+                        className="hover:underline"
+                      >
+                        {tour.numberOfPeople}
+                      </Link>
+                    </td>
 
                     <td className="px-6 py-4">
                       <StatusBadge status={tour.status} />

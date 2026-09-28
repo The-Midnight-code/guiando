@@ -5,15 +5,20 @@ import { getUserByClerkId } from "@/lib/queries/users";
 import { getScheduledTourByUuid } from "@/lib/queries/scheduledTours";
 import StatusBadge from "@/components/ui/StatusBadge";
 import CompleteTourButton from "@/components/guide/CompleteTourButton";
+import Link from "next/link";
 
 interface ScheduledTourPageProps {
   params: Promise<{
     id: string;
   }>;
+  searchParams: Promise<{
+    status?: string;
+  }>;
 }
 
 export default async function GuideScheduledTourPage({
   params,
+  searchParams,
 }: ScheduledTourPageProps) {
   const { userId } = await auth();
 
@@ -28,6 +33,7 @@ export default async function GuideScheduledTourPage({
   }
 
   const { id } = await params;
+  const { status } = await searchParams;
 
   const scheduledTour = await getScheduledTourByUuid(id, user.id);
 
@@ -39,6 +45,16 @@ export default async function GuideScheduledTourPage({
 
   return (
     <main className="space-y-6 p-8">
+      <Link
+        href={
+          status
+            ? `/guide/scheduled-tours?status=${status}`
+            : "/guide/scheduled-tours"
+        }
+        className="text-sm font-medium hover:underline"
+      >
+        ← Back to Scheduled Tours
+      </Link>
       <div>
         <p className="text-sm text-gray-500">
           Scheduled Tour #{scheduledTour.externalId}
@@ -50,7 +66,9 @@ export default async function GuideScheduledTourPage({
           {tour?.description ?? "No description available"}
         </p>
       </div>
-      <div className="flex justify-end">
+      <div className="flex items-center gap-3">
+        <StatusBadge status={scheduledTour.status} />
+
         {scheduledTour.status === "CONFIRMED" && (
           <CompleteTourButton id={scheduledTour.id} />
         )}

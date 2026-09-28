@@ -3,9 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 import { getUserByClerkId } from "@/lib/queries/users";
-import { getGuideUpcomingTours } from "@/lib/queries/guides";
+import {
+  getGuideUpcomingTours,
+  getGuideDashboardStats,
+} from "@/lib/queries/guides";
 import StatusBadge from "@/app/admin/scheduled-tours/StatusBadge";
-import SignOutButton from "@/components/nav/SignOutButton";
 
 export default async function GuideDashboardPage() {
   const { userId } = await auth();
@@ -22,16 +24,31 @@ export default async function GuideDashboardPage() {
     redirect("/guide");
   }
 
-  const upcomingTours = await getGuideUpcomingTours(user.id);
+  const [upcomingTours, stats] = await Promise.all([
+    getGuideUpcomingTours(user.id),
+    getGuideDashboardStats(user.id),
+  ]);
 
   return (
     <div className="space-y-8">
-      <SignOutButton />
       <div>
         <h1 className="text-2xl font-semibold">Guide Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Your upcoming assigned tours.
-        </p>
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-lg border p-4">
+          <p className="text-sm text-muted-foreground">Upcoming Tours</p>
+          <p className="mt-2 text-2xl font-semibold">{stats.upcoming}</p>
+        </div>
+
+        <div className="rounded-lg border p-4">
+          <p className="text-sm text-muted-foreground">Today</p>
+          <p className="mt-2 text-2xl font-semibold">{stats.today}</p>
+        </div>
+
+        <div className="rounded-lg border p-4">
+          <p className="text-sm text-muted-foreground">Confirmed</p>
+          <p className="mt-2 text-2xl font-semibold">{stats.confirmed}</p>
+        </div>
       </div>
 
       <section className="rounded-lg border bg-card">
@@ -66,6 +83,7 @@ export default async function GuideDashboardPage() {
                   <th className="px-6 py-3 font-medium">Pickup</th>
                   <th className="px-6 py-3 font-medium">People</th>
                   <th className="px-6 py-3 font-medium">Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
 
@@ -94,6 +112,14 @@ export default async function GuideDashboardPage() {
 
                     <td className="px-6 py-4">
                       <StatusBadge status={tour.status} />
+                    </td>
+                    <td>
+                      <Link
+                        href={`/guide/scheduled-tours/${tour.id}`}
+                        className="text-sm font-medium hover:underline"
+                      >
+                        View Details
+                      </Link>
                     </td>
                   </tr>
                 ))}
