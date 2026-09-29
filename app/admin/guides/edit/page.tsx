@@ -46,6 +46,7 @@ export default async function EditGuidePage({
           guideId={guide.id}
           initialPhone={guide.phone}
           initialActive={guide.active}
+          initialRole={guide.user?.role ?? "GUIDE"}
         />
       </section>
     </main>

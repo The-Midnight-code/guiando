@@ -1,5 +1,4 @@
-import { count, asc, eq, gte, ne, and } from "drizzle-orm";
-
+import { count, asc, eq, gte, ne, and, inArray } from "drizzle-orm";
 import {
   guides,
   scheduledTours,
@@ -33,7 +32,7 @@ export async function getAdminDashboardStats() {
 export async function getUpcomingTours(limit = 5) {
   const today = new Date().toISOString().split("T")[0];
 
-  return db
+  const upcomingTours = await db
     .select({
       id: scheduledTours.id,
       externalId: scheduledTours.externalId,
@@ -41,18 +40,9 @@ export async function getUpcomingTours(limit = 5) {
       status: scheduledTours.status,
       tourName: tours.name,
       numberOfPeople: scheduledTours.numberOfPeople,
-      guideFirstName: users.firstName,
-      guideLastName: users.lastName,
-      guideClerkId: users.clerkId,
     })
     .from(scheduledTours)
     .innerJoin(tours, eq(scheduledTours.tourId, tours.id))
-    .leftJoin(
-      scheduledTourGuides,
-      eq(scheduledTourGuides.scheduledTourId, scheduledTours.id),
-    )
-    .leftJoin(guides, eq(guides.id, scheduledTourGuides.guideId))
-    .leftJoin(users, eq(users.id, guides.userId))
     .where(
       and(
         gte(scheduledTours.tourDate, today),
@@ -61,4 +51,35 @@ export async function getUpcomingTours(limit = 5) {
     )
     .orderBy(asc(scheduledTours.tourDate))
     .limit(limit);
+
+  if (upcomingTours.length === 0) {
+    return [];
+  }
+
+  const tourIds = upcomingTours.map((tour) => tour.id);
+
+  const assignedGuides = await db
+    .select({
+      scheduledTourId: scheduledTourGuides.scheduledTourId,
+      guideFirstName: users.firstName,
+      guideLastName: users.lastName,
+      guideClerkId: users.clerkId,
+    })
+    .from(scheduledTourGuides)
+    .innerJoin(guides, eq(guides.id, scheduledTourGuides.guideId))
+    .innerJoin(users, eq(users.id, guides.userId))
+    .where(inArray(scheduledTourGuides.scheduledTourId, tourIds));
+
+  return upcomingTours.map((tour) => {
+    const guide = assignedGuides.find(
+      (item) => item.scheduledTourId === tour.id,
+    );
+
+    return {
+      ...tour,
+      guideFirstName: guide?.guideFirstName ?? null,
+      guideLastName: guide?.guideLastName ?? null,
+      guideClerkId: guide?.guideClerkId ?? null,
+    };
+  });
 }

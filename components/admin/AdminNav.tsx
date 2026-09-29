@@ -10,7 +10,6 @@ export default function AdminNav() {
   const isScheduledTours = pathname.startsWith("/admin/scheduled-tours");
   const isTours = pathname.startsWith("/admin/tours");
   const isGuides = pathname.startsWith("/admin/guides");
-  const isTravelers = pathname.startsWith("/admin/travelers");
   const isReports = pathname.startsWith("/admin/reports");
   const isCatalogs = pathname.startsWith("/admin/catalogs");
 
@@ -60,16 +59,6 @@ export default function AdminNav() {
         Guides
       </Link>
 
-      <Link
-        href="/admin/travelers"
-        className={
-          isTravelers
-            ? "font-medium text-primary"
-            : "text-muted-foreground transition-colors hover:text-foreground"
-        }
-      >
-        Travelers
-      </Link>
       <Link
         href="/admin/catalogs"
         className={

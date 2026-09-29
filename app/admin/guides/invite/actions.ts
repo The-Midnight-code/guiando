@@ -2,12 +2,31 @@
 
 import { auth, clerkClient } from "@clerk/nextjs/server";
 
-export async function inviteGuideAction(email: string) {
+import { db } from "@/db/db";
+
+async function requireAdmin() {
   const { userId } = await auth();
 
   if (!userId) {
     throw new Error("Unauthorized");
   }
+
+  const currentUser = await db.query.users.findFirst({
+    where: {
+      clerkId: userId,
+    },
+  });
+
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    throw new Error("Forbidden");
+  }
+}
+
+export async function inviteGuideAction(
+  email: string,
+  role: "ADMIN" | "GUIDE",
+) {
+  await requireAdmin();
 
   const normalizedEmail = email.trim().toLowerCase();
 
@@ -22,7 +41,7 @@ export async function inviteGuideAction(email: string) {
   const alreadyInvited = pendingInvitations.some(
     (invitation) =>
       invitation.emailAddress.toLowerCase() === normalizedEmail &&
-      invitation.publicMetadata?.role === "GUIDE",
+      invitation.publicMetadata?.role === role,
   );
 
   if (alreadyInvited) {
@@ -32,17 +51,13 @@ export async function inviteGuideAction(email: string) {
   await client.invitations.createInvitation({
     emailAddress: normalizedEmail,
     publicMetadata: {
-      role: "GUIDE",
+      role,
     },
   });
 }
 
 export async function revokeGuideInvitationAction(invitationId: string) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
+  await requireAdmin();
 
   const client = await clerkClient();
 
@@ -50,11 +65,7 @@ export async function revokeGuideInvitationAction(invitationId: string) {
 }
 
 export async function resendGuideInvitationAction(invitationId: string) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
+  await requireAdmin();
 
   const client = await clerkClient();
 
@@ -63,20 +74,20 @@ export async function resendGuideInvitationAction(invitationId: string) {
     limit: 100,
   });
 
-  const invitation = invitations.find(
-    (item) => item.id === invitationId && item.publicMetadata?.role === "GUIDE",
-  );
+  const invitation = invitations.find((item) => item.id === invitationId);
 
   if (!invitation) {
     throw new Error("Invitation not found.");
   }
+
+  const role = invitation.publicMetadata?.role === "ADMIN" ? "ADMIN" : "GUIDE";
 
   await client.invitations.revokeInvitation(invitationId);
 
   await client.invitations.createInvitation({
     emailAddress: invitation.emailAddress,
     publicMetadata: {
-      role: "GUIDE",
+      role,
     },
   });
 }

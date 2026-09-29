@@ -19,6 +19,10 @@ export default async function GuideLayout({ children }: GuideLayoutProps) {
   }
 
   const user = await getUserByClerkId(userId);
+  console.log("Guide auth check:", {
+    clerkUserId: userId,
+    databaseUser: user,
+  });
 
   if (!user || user.role !== "GUIDE") {
     redirect("/guide");

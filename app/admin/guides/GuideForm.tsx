@@ -9,17 +9,20 @@ interface GuideFormProps {
   guideId: string;
   initialPhone: string | null;
   initialActive: boolean;
+  initialRole: "ADMIN" | "GUIDE";
 }
 
 export default function GuideForm({
   guideId,
   initialPhone,
   initialActive,
+  initialRole,
 }: GuideFormProps) {
   const router = useRouter();
 
   const [phone, setPhone] = useState(initialPhone ?? "");
   const [active, setActive] = useState(initialActive);
+  const [role, setRole] = useState<"ADMIN" | "GUIDE">(initialRole);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +33,7 @@ export default function GuideForm({
     setError(null);
 
     try {
-      await updateGuideAction(guideId, phone, active);
+      await updateGuideAction(guideId, phone, active, role);
 
       router.push("/admin/guides");
       router.refresh();
@@ -56,6 +59,22 @@ export default function GuideForm({
           className="w-full rounded-md border bg-card px-3 py-2"
           placeholder="Enter phone number"
         />
+      </div>
+      <div>
+        <label htmlFor="role" className="mb-1 block text-sm font-medium">
+          Role
+        </label>
+
+        <select
+          id="role"
+          name="role"
+          value={role}
+          onChange={(event) => setRole(event.target.value as "ADMIN" | "GUIDE")}
+          className="w-full rounded-md border bg-card px-3 py-2"
+        >
+          <option value="GUIDE">Guide</option>
+          <option value="ADMIN">Admin</option>
+        </select>
       </div>
 
       <div className="flex items-center justify-between rounded-lg border bg-card-secondary p-4">

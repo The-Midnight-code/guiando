@@ -9,6 +9,7 @@ export default function InviteGuideForm() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState<"ADMIN" | "GUIDE">("GUIDE");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,7 +20,7 @@ export default function InviteGuideForm() {
     setError(null);
 
     try {
-      await inviteGuideAction(email);
+      await inviteGuideAction(email, role);
 
       router.push("/admin/guides");
       router.refresh();
@@ -50,6 +51,22 @@ export default function InviteGuideForm() {
           className="w-full rounded-md border bg-card px-3 py-2"
           placeholder="guide@example.com"
         />
+      </div>
+      <div>
+        <label htmlFor="role" className="mb-1 block text-sm font-medium">
+          Role
+        </label>
+
+        <select
+          id="role"
+          name="role"
+          value={role}
+          onChange={(event) => setRole(event.target.value as "ADMIN" | "GUIDE")}
+          className="w-full rounded-md border bg-card px-3 py-2"
+        >
+          <option value="GUIDE">Guide</option>
+          <option value="ADMIN">Admin</option>
+        </select>
       </div>
 
       {error && <p className="text-sm text-error">{error}</p>}
