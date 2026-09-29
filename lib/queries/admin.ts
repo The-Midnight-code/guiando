@@ -43,6 +43,7 @@ export async function getUpcomingTours(limit = 5) {
       numberOfPeople: scheduledTours.numberOfPeople,
       guideFirstName: users.firstName,
       guideLastName: users.lastName,
+      guideClerkId: users.clerkId,
     })
     .from(scheduledTours)
     .innerJoin(tours, eq(scheduledTours.tourId, tours.id))

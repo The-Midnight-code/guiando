@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { assignGuideAction, removeGuideAction } from "./guide-actions";
@@ -10,6 +10,7 @@ interface Guide {
   user: {
     firstName: string | null;
     lastName: string | null;
+    imageUrl: string | null;
   } | null;
 }
 
@@ -31,17 +32,30 @@ export default function GuideAssignment({
   assignedGuides,
 }: GuideAssignmentProps) {
   const router = useRouter();
+  const guideDropdownRef = useRef<HTMLDivElement>(null);
 
   const [selectedGuideId, setSelectedGuideId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [guideSearch, setGuideSearch] = useState("");
+  const [isGuideDropdownOpen, setIsGuideDropdownOpen] = useState(false);
 
-  const availableGuides = guides.filter(
-    (guide) =>
-      !assignedGuides.some(
-        (assignedGuide) => assignedGuide.guideId === guide.id,
-      ),
-  );
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        guideDropdownRef.current &&
+        !guideDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsGuideDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const getGuideName = (guide: Guide) => {
     if (!guide.user) {
@@ -50,6 +64,23 @@ export default function GuideAssignment({
 
     return `${guide.user.firstName ?? ""} ${guide.user.lastName ?? ""}`.trim();
   };
+
+  const availableGuides = guides.filter(
+    (guide) =>
+      !assignedGuides.some(
+        (assignedGuide) => assignedGuide.guideId === guide.id,
+      ),
+  );
+
+  const filteredGuides = availableGuides.filter((guide) =>
+    getGuideName(guide)
+      .toLowerCase()
+      .includes(guideSearch.trim().toLowerCase()),
+  );
+
+  const selectedGuide = availableGuides.find(
+    (guide) => guide.id === selectedGuideId,
+  );
 
   const handleAssign = async () => {
     if (!selectedGuideId) {
@@ -66,8 +97,9 @@ export default function GuideAssignment({
         setError(result.error ?? "Failed to assign guide.");
         return;
       }
-
       setSelectedGuideId("");
+      setGuideSearch("");
+      setIsGuideDropdownOpen(false);
       router.refresh();
     } catch (err) {
       console.error(err);
@@ -132,16 +164,36 @@ export default function GuideAssignment({
                 key={assignment.id}
                 className="flex flex-col gap-4 rounded-lg bg-card-secondary p-4 sm:flex-row sm:items-center sm:justify-between"
               >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">
-                    {assignment.guide
-                      ? getGuideName(assignment.guide)
-                      : "Unknown Guide"}
-                  </p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-card">
+                    {assignment.guide?.user?.imageUrl ? (
+                      <img
+                        src={assignment.guide.user.imageUrl}
+                        alt={
+                          assignment.guide
+                            ? getGuideName(assignment.guide)
+                            : "Guide"
+                        }
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-sm font-medium text-muted-foreground">
+                        {assignment.guide?.user?.firstName?.charAt(0) ?? "?"}
+                      </div>
+                    )}
+                  </div>
 
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Assigned guide
-                  </p>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">
+                      {assignment.guide
+                        ? getGuideName(assignment.guide)
+                        : "Unknown Guide"}
+                    </p>
+
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Assigned guide
+                    </p>
+                  </div>
                 </div>
 
                 <button
@@ -167,22 +219,94 @@ export default function GuideAssignment({
             </label>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <select
-                id="guide"
-                value={selectedGuideId}
-                onChange={(event) => setSelectedGuideId(event.target.value)}
-                disabled={isSubmitting}
-                className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary sm:flex-1"
-              >
-                <option value="">Select guide...</option>
+              <div ref={guideDropdownRef} className="relative w-full sm:flex-1">
+                <button
+                  type="button"
+                  onClick={() => setIsGuideDropdownOpen((current) => !current)}
+                  disabled={isSubmitting}
+                  className="flex w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-left text-sm outline-none transition-colors hover:bg-card-secondary focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {selectedGuide ? (
+                    <span className="flex min-w-0 items-center gap-3">
+                      <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-card-secondary">
+                        {selectedGuide.user?.imageUrl ? (
+                          <img
+                            src={selectedGuide.user.imageUrl}
+                            alt={getGuideName(selectedGuide)}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="flex h-full w-full items-center justify-center text-xs font-medium text-muted-foreground">
+                            {selectedGuide.user?.firstName?.charAt(0) ?? "?"}
+                          </span>
+                        )}
+                      </span>
 
-                {availableGuides.map((guide) => (
-                  <option key={guide.id} value={guide.id}>
-                    {getGuideName(guide)}
-                  </option>
-                ))}
-              </select>
+                      <span className="truncate">
+                        {getGuideName(selectedGuide)}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">
+                      Select guide...
+                    </span>
+                  )}
 
+                  <span className="ml-2 shrink-0 text-muted-foreground">▾</span>
+                </button>
+
+                {isGuideDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full z-50 mt-2 rounded-lg border bg-card p-2 shadow-xl">
+                    <input
+                      type="text"
+                      value={guideSearch}
+                      onChange={(event) => setGuideSearch(event.target.value)}
+                      placeholder="Search guides..."
+                      autoFocus
+                      className="mb-2 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+                    />
+
+                    <div className="max-h-60 overflow-y-auto">
+                      {filteredGuides.length === 0 ? (
+                        <p className="px-3 py-4 text-center text-sm text-muted-foreground">
+                          No guides found.
+                        </p>
+                      ) : (
+                        filteredGuides.map((guide) => (
+                          <button
+                            key={guide.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedGuideId(guide.id);
+                              setGuideSearch("");
+                              setIsGuideDropdownOpen(false);
+                            }}
+                            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-card-secondary"
+                          >
+                            <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-card-secondary">
+                              {guide.user?.imageUrl ? (
+                                <img
+                                  src={guide.user.imageUrl}
+                                  alt={getGuideName(guide)}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <span className="flex h-full w-full items-center justify-center text-xs font-medium text-muted-foreground">
+                                  {guide.user?.firstName?.charAt(0) ?? "?"}
+                                </span>
+                              )}
+                            </span>
+
+                            <span className="truncate text-sm font-medium">
+                              {getGuideName(guide)}
+                            </span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={handleAssign}

@@ -1,3 +1,4 @@
+import { clerkClient } from "@clerk/nextjs/server";
 import Link from "next/link";
 
 import { getAdminDashboardStats, getUpcomingTours } from "@/lib/queries/admin";
@@ -8,6 +9,29 @@ export default async function AdminDashboardPage() {
     getAdminDashboardStats(),
     getUpcomingTours(),
   ]);
+
+  const client = await clerkClient();
+
+  const clerkIds = upcomingTours
+    .map((tour) => tour.guideClerkId)
+    .filter((clerkId): clerkId is string => Boolean(clerkId));
+
+  const uniqueClerkIds = [...new Set(clerkIds)];
+
+  const { data: clerkUsers } = await client.users.getUserList({
+    userId: uniqueClerkIds,
+  });
+
+  const guideImageMap = new Map(
+    clerkUsers.map((user) => [user.id, user.imageUrl]),
+  );
+
+  const upcomingToursWithImages = upcomingTours.map((tour) => ({
+    ...tour,
+    guideImageUrl: tour.guideClerkId
+      ? (guideImageMap.get(tour.guideClerkId) ?? null)
+      : null,
+  }));
 
   const cards = [
     {
@@ -115,7 +139,7 @@ export default async function AdminDashboardPage() {
                 </thead>
 
                 <tbody className="divide-y">
-                  {upcomingTours.map((tour) => {
+                  {upcomingToursWithImages.map((tour) => {
                     const guideName =
                       [tour.guideFirstName, tour.guideLastName]
                         .filter(Boolean)
@@ -158,7 +182,23 @@ export default async function AdminDashboardPage() {
                             href={`/admin/scheduled-tours/${tour.externalId}`}
                             className="block"
                           >
-                            {guideName}
+                            <div className="flex items-center gap-2">
+                              {tour.guideImageUrl ? (
+                                <img
+                                  src={tour.guideImageUrl}
+                                  alt={guideName}
+                                  className="h-7 w-7 rounded-full object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-card-secondary text-xs font-medium">
+                                  {guideName !== "Unassigned"
+                                    ? guideName.charAt(0).toUpperCase()
+                                    : "—"}
+                                </div>
+                              )}
+
+                              <span>{guideName}</span>
+                            </div>
                           </Link>
                         </td>
 
@@ -178,7 +218,7 @@ export default async function AdminDashboardPage() {
             </div>
 
             <div className="divide-y md:hidden">
-              {upcomingTours.map((tour) => {
+              {upcomingToursWithImages.map((tour) => {
                 const guideName =
                   [tour.guideFirstName, tour.guideLastName]
                     .filter(Boolean)
@@ -208,7 +248,23 @@ export default async function AdminDashboardPage() {
                           Guide
                         </p>
 
-                        <p className="mt-1">{guideName}</p>
+                        <div className="mt-1 flex items-center gap-2">
+                          {tour.guideImageUrl ? (
+                            <img
+                              src={tour.guideImageUrl}
+                              alt={guideName}
+                              className="h-7 w-7 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-card-secondary text-xs font-medium">
+                              {guideName !== "Unassigned"
+                                ? guideName.charAt(0).toUpperCase()
+                                : "—"}
+                            </div>
+                          )}
+
+                          <span>{guideName}</span>
+                        </div>
                       </div>
 
                       <div>

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { clerkClient } from "@clerk/nextjs/server";
 
 import { getScheduledTourById } from "@/lib/queries/scheduledTours";
 import { getActiveGuides } from "@/lib/queries/guides";
@@ -36,6 +37,49 @@ export default async function ScheduledTourPage({
     getGuidesForScheduledTour(id),
     getTravelers(),
   ]);
+
+  const client = await clerkClient();
+
+  const clerkIds = [
+    ...guides.map((guide) => guide.user?.clerkId),
+    ...assignedGuides.map((assignment) => assignment.guide?.user?.clerkId),
+  ].filter((clerkId): clerkId is string => Boolean(clerkId));
+
+  const uniqueClerkIds = [...new Set(clerkIds)];
+
+  const { data: clerkUsers } = await client.users.getUserList({
+    userId: uniqueClerkIds,
+  });
+
+  const guideImageMap = new Map(
+    clerkUsers.map((user) => [user.id, user.imageUrl]),
+  );
+
+  const guidesWithImages = guides.map((guide) => ({
+    ...guide,
+    user: guide.user
+      ? {
+          ...guide.user,
+          imageUrl: guideImageMap.get(guide.user.clerkId) ?? null,
+        }
+      : null,
+  }));
+
+  const assignedGuidesWithImages = assignedGuides.map((assignment) => ({
+    ...assignment,
+    guide: assignment.guide
+      ? {
+          ...assignment.guide,
+          user: assignment.guide.user
+            ? {
+                ...assignment.guide.user,
+                imageUrl:
+                  guideImageMap.get(assignment.guide.user.clerkId) ?? null,
+              }
+            : null,
+        }
+      : null,
+  }));
 
   if (!scheduledTour) {
     notFound();
@@ -353,8 +397,8 @@ export default async function ScheduledTourPage({
         <div className="grid gap-6 lg:grid-cols-2">
           <GuideAssignment
             externalId={id}
-            guides={guides}
-            assignedGuides={assignedGuides}
+            guides={guidesWithImages}
+            assignedGuides={assignedGuidesWithImages}
           />
 
           <TravelersSection

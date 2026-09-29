@@ -1,3 +1,4 @@
+import { clerkClient } from "@clerk/nextjs/server";
 import Link from "next/link";
 
 import { getScheduledToursForAdmin } from "@/lib/queries/scheduledTours";
@@ -54,6 +55,44 @@ export default async function ScheduledToursPage({
     page,
     pageSize,
   });
+  const client = await clerkClient();
+
+  const clerkIds = result.items
+    .flatMap((scheduledTour) =>
+      scheduledTour.guideAssignments.map(
+        (assignment) => assignment.guide?.user?.clerkId,
+      ),
+    )
+    .filter((clerkId): clerkId is string => Boolean(clerkId));
+
+  const uniqueClerkIds = [...new Set(clerkIds)];
+
+  const { data: clerkUsers } = await client.users.getUserList({
+    userId: uniqueClerkIds,
+  });
+
+  const guideImageMap = new Map(
+    clerkUsers.map((user) => [user.id, user.imageUrl]),
+  );
+
+  const scheduledToursWithImages = result.items.map((scheduledTour) => ({
+    ...scheduledTour,
+    guideAssignments: scheduledTour.guideAssignments.map((assignment) => ({
+      ...assignment,
+      guide: assignment.guide
+        ? {
+            ...assignment.guide,
+            user: assignment.guide.user
+              ? {
+                  ...assignment.guide.user,
+                  imageUrl:
+                    guideImageMap.get(assignment.guide.user.clerkId) ?? null,
+                }
+              : null,
+          }
+        : null,
+    })),
+  }));
 
   return (
     <main className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -75,7 +114,7 @@ export default async function ScheduledToursPage({
       </div>
 
       <ScheduledToursTable
-        scheduledTours={result.items}
+        scheduledTours={scheduledToursWithImages}
         total={result.total}
         page={result.page}
         pageSize={result.pageSize}

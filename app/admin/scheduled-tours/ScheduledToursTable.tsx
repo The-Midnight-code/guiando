@@ -27,6 +27,8 @@ interface ScheduledTour {
       user: {
         firstName: string | null;
         lastName: string | null;
+        clerkId: string;
+        imageUrl: string | null;
       } | null;
     } | null;
   }[];
@@ -338,9 +340,31 @@ export default function ScheduledToursTable({
                       </td>
 
                       <td className="max-w-xs px-6 py-3.5 text-sm text-muted-foreground">
-                        <p className="truncate">
-                          {getGuideName(scheduledTour)}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          {scheduledTour.guideAssignments[0]?.guide?.user
+                            ?.imageUrl ? (
+                            <img
+                              src={
+                                scheduledTour.guideAssignments[0].guide.user
+                                  .imageUrl
+                              }
+                              alt={getGuideName(scheduledTour)}
+                              className="h-7 w-7 shrink-0 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-card-secondary text-xs font-medium">
+                              {getGuideName(scheduledTour) !== "Unassigned"
+                                ? getGuideName(scheduledTour)
+                                    .charAt(0)
+                                    .toUpperCase()
+                                : "—"}
+                            </div>
+                          )}
+
+                          <p className="truncate">
+                            {getGuideName(scheduledTour)}
+                          </p>
+                        </div>
                       </td>
 
                       <td className="px-6 py-3.5 text-right text-sm text-muted-foreground">
@@ -426,9 +450,31 @@ export default function ScheduledToursTable({
                         Guide
                       </p>
 
-                      <p className="mt-1 truncate">
-                        {getGuideName(scheduledTour)}
-                      </p>
+                      <div className="mt-1 flex items-center gap-2">
+                        {scheduledTour.guideAssignments[0]?.guide?.user
+                          ?.imageUrl ? (
+                          <img
+                            src={
+                              scheduledTour.guideAssignments[0].guide.user
+                                .imageUrl
+                            }
+                            alt={getGuideName(scheduledTour)}
+                            className="h-7 w-7 shrink-0 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-card-secondary text-xs font-medium">
+                            {getGuideName(scheduledTour) !== "Unassigned"
+                              ? getGuideName(scheduledTour)
+                                  .charAt(0)
+                                  .toUpperCase()
+                              : "—"}
+                          </div>
+                        )}
+
+                        <span className="truncate">
+                          {getGuideName(scheduledTour)}
+                        </span>
+                      </div>
                     </div>
 
                     <div>
