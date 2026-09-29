@@ -1,4 +1,7 @@
 "use client";
+import { useState } from "react";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -29,6 +32,18 @@ export default function ReportsFilters({
 
   const startDate = searchParams.get("startDate") ?? "";
   const endDate = searchParams.get("endDate") ?? "";
+  const [showStartCalendar, setShowStartCalendar] = useState(false);
+  const [showEndCalendar, setShowEndCalendar] = useState(false);
+  const [tourSearch, setTourSearch] = useState("");
+  const [showTourOptions, setShowTourOptions] = useState(false);
+
+  const selectedTourId = searchParams.get("tourId") ?? "";
+
+  const selectedTour = tours.find((tour) => tour.id === selectedTourId);
+
+  const filteredTours = tours.filter((tour) =>
+    tour.name.toLowerCase().includes(tourSearch.toLowerCase()),
+  );
 
   function updateFilter(name: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -43,44 +58,74 @@ export default function ReportsFilters({
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <div>
-        <label
-          htmlFor="startDate"
-          className="mb-1 block text-sm font-medium text-gray-700"
-        >
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+      <div className="relative">
+        <label className="mb-1 block text-sm font-medium text-muted-foreground">
           Start date
         </label>
 
-        <input
-          id="startDate"
-          type="date"
-          value={startDate}
-          onChange={(event) => updateFilter("startDate", event.target.value)}
-          className="w-full rounded-md border px-3 py-2 text-sm"
-        />
+        <button
+          type="button"
+          onClick={() => setShowStartCalendar((value) => !value)}
+          className="w-full rounded-md border bg-card px-3 py-2 text-left text-sm text-foreground hover:bg-card-secondary"
+        >
+          {startDate || "Select start date"}
+        </button>
+
+        {showStartCalendar && (
+          <div className="absolute z-20 mt-2 rounded-lg border bg-card p-3 shadow-lg">
+            <DayPicker
+              mode="single"
+              selected={
+                startDate ? new Date(`${startDate}T00:00:00`) : undefined
+              }
+              onSelect={(date) => {
+                if (!date) return;
+
+                const value = date.toISOString().split("T")[0];
+
+                updateFilter("startDate", value);
+                setShowStartCalendar(false);
+              }}
+            />
+          </div>
+        )}
       </div>
 
-      <div>
-        <label
-          htmlFor="endDate"
-          className="mb-1 block text-sm font-medium text-gray-700"
-        >
+      <div className="relative">
+        <label className="mb-1 block text-sm font-medium text-muted-foreground">
           End date
         </label>
 
-        <input
-          id="endDate"
-          type="date"
-          value={endDate}
-          onChange={(event) => updateFilter("endDate", event.target.value)}
-          className="w-full rounded-md border px-3 py-2 text-sm"
-        />
+        <button
+          type="button"
+          onClick={() => setShowEndCalendar((value) => !value)}
+          className="w-full rounded-md border bg-card px-3 py-2 text-left text-sm text-foreground hover:bg-card-secondary"
+        >
+          {endDate || "Select end date"}
+        </button>
+
+        {showEndCalendar && (
+          <div className="absolute z-20 mt-2 rounded-lg border bg-card p-3 shadow-lg">
+            <DayPicker
+              mode="single"
+              selected={endDate ? new Date(`${endDate}T00:00:00`) : undefined}
+              onSelect={(date) => {
+                if (!date) return;
+
+                const value = date.toISOString().split("T")[0];
+
+                updateFilter("endDate", value);
+                setShowEndCalendar(false);
+              }}
+            />
+          </div>
+        )}
       </div>
       <div>
         <label
           htmlFor="tourTypeId"
-          className="mb-1 block text-sm font-medium text-gray-700"
+          className="mb-1 block text-sm font-medium text-muted-foreground"
         >
           Tour Type
         </label>
@@ -100,10 +145,12 @@ export default function ReportsFilters({
             }
 
             params.delete("tourId");
+            setTourSearch("");
+            setShowTourOptions(false);
 
             router.push(`${pathname}?${params.toString()}`);
           }}
-          className="w-full rounded-md border px-3 py-2 text-sm"
+          className="w-full rounded-md border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         >
           <option value="">All tour types</option>
 
@@ -114,33 +161,71 @@ export default function ReportsFilters({
           ))}
         </select>
       </div>
-      <div>
-        <label
-          htmlFor="tourId"
-          className="mb-1 block text-sm font-medium text-gray-700"
-        >
+      <div className="relative">
+        <label className="mb-1 block text-sm font-medium text-muted-foreground">
           Tour
         </label>
 
-        <select
-          id="tourId"
-          value={searchParams.get("tourId") ?? ""}
-          onChange={(event) => updateFilter("tourId", event.target.value)}
-          className="w-full rounded-md border px-3 py-2 text-sm"
+        <button
+          type="button"
+          onClick={() => setShowTourOptions((value) => !value)}
+          className="w-full rounded-md border bg-card px-3 py-2 text-left text-sm text-foreground hover:bg-card-secondary"
         >
-          <option value="">All tours</option>
+          {selectedTour?.name ?? "All tours"}
+        </button>
 
-          {tours.map((tour) => (
-            <option key={tour.id} value={tour.id}>
-              {tour.name}
-            </option>
-          ))}
-        </select>
+        {showTourOptions && (
+          <div className="absolute z-20 mt-2 w-full rounded-lg border bg-card p-2 shadow-lg">
+            <input
+              type="text"
+              value={tourSearch}
+              onChange={(event) => setTourSearch(event.target.value)}
+              placeholder="Search tours..."
+              className="mb-2 w-full rounded-md border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              autoFocus
+            />
+
+            <div className="max-h-60 overflow-y-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  updateFilter("tourId", "");
+                  setTourSearch("");
+                  setShowTourOptions(false);
+                }}
+                className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-card-secondary"
+              >
+                All tours
+              </button>
+
+              {filteredTours.map((tour) => (
+                <button
+                  key={tour.id}
+                  type="button"
+                  onClick={() => {
+                    updateFilter("tourId", tour.id);
+                    setTourSearch("");
+                    setShowTourOptions(false);
+                  }}
+                  className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-card-secondary"
+                >
+                  {tour.name}
+                </button>
+              ))}
+
+              {filteredTours.length === 0 && (
+                <p className="px-3 py-2 text-sm text-muted-foreground">
+                  No tours found.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
       <div>
         <label
           htmlFor="status"
-          className="mb-1 block text-sm font-medium text-gray-700"
+          className="mb-1 block text-sm font-medium text-muted-foreground"
         >
           Status
         </label>
@@ -149,7 +234,7 @@ export default function ReportsFilters({
           id="status"
           value={searchParams.get("status") ?? ""}
           onChange={(event) => updateFilter("status", event.target.value)}
-          className="w-full rounded-md border px-3 py-2 text-sm"
+          className="w-full rounded-md border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         >
           <option value="">All statuses</option>
 

@@ -65,57 +65,78 @@ export default async function ReportsPage({
   };
 
   return (
-    <main className="space-y-6 p-8">
-      <div>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Reports & Statistics</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Financial overview based on the selected filters.
-            </p>
-          </div>
+    <main className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Reports & Statistics</h1>
 
-          <a
-            href={`/api/reports/financials/export?${new URLSearchParams({
-              startDate,
-              endDate,
-              ...(tourTypeId && { tourTypeId }),
-              ...(tourId && { tourId }),
-              ...(status && { status }),
-            }).toString()}`}
-            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-          >
-            Export CSV
-          </a>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Financial overview based on the selected filters.
+          </p>
         </div>
+
+        <a
+          href={`/api/reports/financials/export?${new URLSearchParams({
+            startDate,
+            endDate,
+            ...(tourTypeId && { tourTypeId }),
+            ...(tourId && { tourId }),
+            ...(status && { status }),
+          }).toString()}`}
+          className="w-full rounded-md bg-primary px-4 py-2 text-center text-sm font-medium text-white hover:bg-primary-hover sm:w-auto"
+        >
+          Export CSV
+        </a>
       </div>
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-lg border bg-white p-5">
-          <p className="text-sm text-gray-500">Total Payments</p>
-          <p className="mt-2 text-2xl font-bold">${totalPayments.toFixed(2)}</p>
-          <p className="mt-1 text-xs text-gray-400">USD</p>
+        <div className="rounded-xl border bg-card p-5">
+          <p className="text-sm text-muted-foreground">Total Payments</p>
+
+          <p className="mt-2 text-2xl font-semibold">
+            ${totalPayments.toFixed(2)}
+          </p>
+
+          <p className="mt-1 text-xs text-muted-foreground">USD</p>
         </div>
 
-        <div className="rounded-lg border bg-white p-5">
-          <p className="text-sm text-gray-500">Total Cost</p>
-          <p className="mt-2 text-2xl font-bold">${totalCost.toFixed(2)}</p>
-          <p className="mt-1 text-xs text-gray-400">USD</p>
+        <div className="rounded-xl border bg-card p-5">
+          <p className="text-sm text-muted-foreground">Total Cost</p>
+
+          <p className="mt-2 text-2xl font-semibold">${totalCost.toFixed(2)}</p>
+
+          <p className="mt-1 text-xs text-muted-foreground">USD</p>
         </div>
 
-        <div className="rounded-lg border bg-white p-5">
-          <p className="text-sm text-gray-500">Total Revenue</p>
-          <p className="mt-2 text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
-          <p className="mt-1 text-xs text-gray-400">USD</p>
+        <div className="rounded-xl border bg-card p-5">
+          <p className="text-sm text-muted-foreground">Total Revenue</p>
+
+          <p className="mt-2 text-2xl font-semibold text-success">
+            ${totalRevenue.toFixed(2)}
+          </p>
+
+          <p className="mt-1 text-xs text-muted-foreground">USD</p>
         </div>
 
-        <div className="rounded-lg border bg-white p-5">
-          <p className="text-sm text-gray-500">Revenue Margin</p>
-          <p className="mt-2 text-2xl font-bold">{revenueMargin.toFixed(2)}%</p>
-          <p className="mt-1 text-xs text-gray-400">Revenue / Total Payments</p>
+        <div className="rounded-xl border bg-card p-5">
+          <p className="text-sm text-muted-foreground">Revenue Margin</p>
+
+          <p className="mt-2 text-2xl font-semibold text-primary">
+            {revenueMargin.toFixed(2)}%
+          </p>
+
+          <p className="mt-1 text-xs text-muted-foreground">
+            Revenue / Total Payments
+          </p>
         </div>
       </section>
-      <section className="rounded-lg border bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold">Filters</h2>
+      <section className="rounded-xl border bg-card p-6">
+        <div className="mb-5">
+          <h2 className="text-lg font-semibold">Filters</h2>
+
+          <p className="mt-1 text-sm text-muted-foreground">
+            Filter the financial report by date, tour, type, or status.
+          </p>
+        </div>
 
         <ReportsFilters
           tourTypes={tourTypes}
@@ -124,44 +145,56 @@ export default async function ReportsPage({
         />
       </section>
 
-      <section className="rounded-lg border bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold">Financial Report</h2>
+      <section className="rounded-xl border bg-card p-6">
+        <div className="mb-5">
+          <h2 className="text-lg font-semibold">Financial Report</h2>
+
+          <p className="mt-1 text-sm text-muted-foreground">
+            Detailed financial results for the selected period.
+          </p>
+        </div>
 
         {rows.length === 0 ? (
-          <p className="text-sm text-gray-500">
-            No financial records found for this period.
-          </p>
+          <div className="py-10 text-center">
+            <p className="text-sm font-medium text-foreground">
+              No financial records found
+            </p>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              Try adjusting the selected filters or date range.
+            </p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y">
-              <thead className="bg-gray-50">
+              <thead className="bg-card-secondary">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                     Date
                   </th>
 
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                     Tour
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
                     People
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                     Status
                   </th>
 
-                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
                     Payment (USD)
                   </th>
 
-                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
                     Cost (USD)
                   </th>
 
-                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
                     Revenue (USD)
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
                     Margin
                   </th>
                 </tr>
@@ -170,33 +203,33 @@ export default async function ReportsPage({
               <tbody className="divide-y">
                 {rows.map((row) => (
                   <tr key={row.scheduledTourId}>
-                    <td className="px-4 py-3 text-sm text-gray-600">
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
                       {row.tourDate}
                     </td>
 
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                    <td className="px-4 py-3 text-sm font-medium text-foreground">
                       {row.tourName}
                     </td>
-                    <td className="px-4 py-3 text-right text-sm text-gray-600">
+                    <td className="px-4 py-3 text-right text-sm text-muted-foreground">
                       {row.numberOfPeople ?? "—"}
                     </td>
 
-                    <td className="px-4 py-3 text-sm text-gray-600">
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
                       {row.status}
                     </td>
 
-                    <td className="px-4 py-3 text-right text-sm text-gray-600">
+                    <td className="px-4 py-3 text-right text-sm text-muted-foreground">
                       {formatUsd(row.totalPaymentUsd)}
                     </td>
 
-                    <td className="px-4 py-3 text-right text-sm text-gray-600">
+                    <td className="px-4 py-3 text-right text-sm text-muted-foreground">
                       {formatUsd(row.totalCostUsd)}
                     </td>
 
-                    <td className="px-4 py-3 text-right text-sm text-gray-600">
+                    <td className="px-4 py-3 text-right text-sm text-muted-foreground">
                       {formatUsd(row.totalRevenueUsd)}
                     </td>
-                    <td className="px-4 py-3 text-right text-sm text-gray-600">
+                    <td className="px-4 py-3 text-right text-sm text-muted-foreground">
                       {row.revenuePercentage != null
                         ? `${Number(row.revenuePercentage).toFixed(2)}%`
                         : "—"}
@@ -204,131 +237,101 @@ export default async function ReportsPage({
                   </tr>
                 ))}
               </tbody>
-              <tfoot className="border-t bg-gray-50">
+              <tfoot className="border-t bg-card-secondary">
                 <tr>
                   <td
                     colSpan={2}
-                    className="px-4 py-3 text-sm font-semibold text-gray-900"
+                    className="px-4 py-3 text-sm font-semibold text-foreground"
                   >
                     Total
                   </td>
 
-                  <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                  <td className="px-4 py-3 text-right text-sm font-semibold text-foreground">
                     {totalPeople}
                   </td>
 
                   <td className="px-4 py-3" />
 
-                  <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                  <td className="px-4 py-3 text-right text-sm font-semibold text-foreground">
                     {formatUsd(totalPayments.toFixed(2))}
                   </td>
 
-                  <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                  <td className="px-4 py-3 text-right text-sm font-semibold text-foreground">
                     {formatUsd(totalCost.toFixed(2))}
                   </td>
 
-                  <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                  <td className="px-4 py-3 text-right text-sm font-semibold text-foreground">
                     {formatUsd(totalRevenue.toFixed(2))}
                   </td>
 
-                  <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                  <td className="px-4 py-3 text-right text-sm font-semibold text-foreground">
                     {revenueMargin.toFixed(2)}%
                   </td>
                 </tr>
               </tfoot>
             </table>
             {totalPages > 1 && (
-              <div className="mt-4 flex items-center justify-between border-t pt-4">
-                <p className="text-sm text-gray-500">
-                  Page {page} of {totalPages} ({total} records)
+              <div className="mt-4 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Showing {(page - 1) * 20 + 1}-{Math.min(page * 20, total)} of{" "}
+                  {total} records
                 </p>
 
-                <div className="flex gap-2">
-                  {totalPages > 1 && (
-                    <div className="mt-4 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-                      <p className="text-sm text-gray-500">
-                        Showing{" "}
-                        <span className="font-medium text-gray-700">
-                          {(page - 1) * 20 + 1}
-                        </span>{" "}
-                        –{" "}
-                        <span className="font-medium text-gray-700">
-                          {Math.min(page * 20, total)}
-                        </span>{" "}
-                        of{" "}
-                        <span className="font-medium text-gray-700">
-                          {total}
-                        </span>{" "}
-                        records
-                      </p>
+                <div className="flex items-center gap-1">
+                  {page > 1 && (
+                    <a
+                      href={`?${new URLSearchParams({
+                        startDate,
+                        endDate,
+                        ...(tourTypeId && { tourTypeId }),
+                        ...(tourId && { tourId }),
+                        ...(status && { status }),
+                        page: String(page - 1),
+                      }).toString()}`}
+                      className="rounded-md border px-3 py-2 text-sm font-medium text-foreground hover:bg-card-secondary"
+                    >
+                      Previous
+                    </a>
+                  )}
 
-                      <div className="flex items-center gap-1">
-                        {page > 1 ? (
-                          <a
-                            href={`?${new URLSearchParams({
-                              startDate,
-                              endDate,
-                              ...(tourTypeId && { tourTypeId }),
-                              ...(tourId && { tourId }),
-                              ...(status && { status }),
-                              page: String(page - 1),
-                            }).toString()}`}
-                            className="rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
-                          >
-                            Previous
-                          </a>
-                        ) : (
-                          <span className="cursor-not-allowed rounded-md border px-3 py-2 text-sm text-gray-300">
-                            Previous
-                          </span>
-                        )}
+                  {Array.from(
+                    { length: totalPages },
+                    (_, index) => index + 1,
+                  ).map((pageNumber) => (
+                    <a
+                      key={pageNumber}
+                      href={`?${new URLSearchParams({
+                        startDate,
+                        endDate,
+                        ...(tourTypeId && { tourTypeId }),
+                        ...(tourId && { tourId }),
+                        ...(status && { status }),
+                        page: String(pageNumber),
+                      }).toString()}`}
+                      className={`rounded-md border px-3 py-2 text-sm font-medium ${
+                        pageNumber === page
+                          ? "border-primary bg-primary text-white"
+                          : "hover:bg-card-secondary"
+                      }`}
+                    >
+                      {pageNumber}
+                    </a>
+                  ))}
 
-                        {Array.from({ length: totalPages }, (_, index) => {
-                          const pageNumber = index + 1;
-
-                          return (
-                            <a
-                              key={pageNumber}
-                              href={`?${new URLSearchParams({
-                                startDate,
-                                endDate,
-                                ...(tourTypeId && { tourTypeId }),
-                                ...(tourId && { tourId }),
-                                ...(status && { status }),
-                                page: String(pageNumber),
-                              }).toString()}`}
-                              className={`rounded-md border px-3 py-2 text-sm ${
-                                pageNumber === page
-                                  ? "bg-gray-900 text-white"
-                                  : "hover:bg-gray-50"
-                              }`}
-                            >
-                              {pageNumber}
-                            </a>
-                          );
-                        })}
-
-                        {page < totalPages ? (
-                          <a
-                            href={`?${new URLSearchParams({
-                              startDate,
-                              endDate,
-                              ...(tourTypeId && { tourTypeId }),
-                              ...(tourId && { tourId }),
-                              ...(status && { status }),
-                              page: String(page + 1),
-                            }).toString()}`}
-                            className="rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
-                          >
-                            Next
-                          </a>
-                        ) : (
-                          <span className="cursor-not-allowed rounded-md border px-3 py-2 text-sm text-gray-300">
-                            Next
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                  {page < totalPages && (
+                    <a
+                      href={`?${new URLSearchParams({
+                        startDate,
+                        endDate,
+                        ...(tourTypeId && { tourTypeId }),
+                        ...(tourId && { tourId }),
+                        ...(status && { status }),
+                        page: String(page + 1),
+                      }).toString()}`}
+                      className="rounded-md border px-3 py-2 text-sm font-medium text-foreground hover:bg-card-secondary"
+                    >
+                      Next
+                    </a>
                   )}
                 </div>
               </div>
