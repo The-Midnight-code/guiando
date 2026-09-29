@@ -12,6 +12,7 @@ export default function AdminNav() {
   const isGuides = pathname.startsWith("/admin/guides");
   const isTravelers = pathname.startsWith("/admin/travelers");
   const isReports = pathname.startsWith("/admin/reports");
+  const isCatalogs = pathname.startsWith("/admin/catalogs");
 
   return (
     <nav className="flex items-center gap-6 text-sm">
@@ -68,6 +69,16 @@ export default function AdminNav() {
         }
       >
         Travelers
+      </Link>
+      <Link
+        href="/admin/catalogs"
+        className={
+          isCatalogs
+            ? "font-medium text-primary"
+            : "text-muted-foreground transition-colors hover:text-foreground"
+        }
+      >
+        Catalogs
       </Link>
 
       <Link

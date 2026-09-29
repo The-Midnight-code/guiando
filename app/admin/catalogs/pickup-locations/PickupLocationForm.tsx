@@ -105,161 +105,166 @@ export default function PickupLocationForm({
     }
   };
 
+  const inputClassName =
+    "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary";
+
+  const labelClassName =
+    "mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground";
+
   return (
-    <section className="rounded-lg bg-white p-6 shadow-sm">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">
+    <section className="rounded-xl border bg-card">
+      <div className="border-b px-6 py-5">
+        <h1 className="font-semibold">
           {initialData ? "Edit Pickup Location" : "Create Pickup Location"}
         </h1>
 
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           {initialData
             ? "Update the pickup location information."
             : "Create a new predefined pickup location."}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="name"
-              className="mb-1 block text-sm font-medium text-gray-700"
-            >
-              Name
-            </label>
+      <div className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div>
+              <label htmlFor="name" className={labelClassName}>
+                Name
+              </label>
 
-            <input
-              id="name"
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="e.g. Tijuana Airport"
-            />
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                placeholder="e.g. Tijuana Airport"
+                className={inputClassName}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="address" className={labelClassName}>
+                Address
+              </label>
+
+              <input
+                id="address"
+                name="address"
+                type="text"
+                value={formData.address}
+                onChange={handleChange}
+                required
+                placeholder="Enter the pickup address"
+                className={inputClassName}
+              />
+            </div>
           </div>
 
           <div>
-            <label
-              htmlFor="address"
-              className="mb-1 block text-sm font-medium text-gray-700"
-            >
-              Address
+            <label htmlFor="instructions" className={labelClassName}>
+              Instructions
             </label>
 
-            <input
-              id="address"
-              name="address"
-              type="text"
-              value={formData.address}
+            <textarea
+              id="instructions"
+              name="instructions"
+              value={formData.instructions}
               onChange={handleChange}
-              required
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Enter the pickup address"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label
-            htmlFor="instructions"
-            className="mb-1 block text-sm font-medium text-gray-700"
-          >
-            Instructions
-          </label>
-
-          <textarea
-            id="instructions"
-            name="instructions"
-            value={formData.instructions}
-            onChange={handleChange}
-            rows={4}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="Instructions for guides or travelers..."
-          />
-        </div>
-
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="latitude"
-              className="mb-1 block text-sm font-medium text-gray-700"
-            >
-              Latitude
-            </label>
-
-            <input
-              id="latitude"
-              name="latitude"
-              type="text"
-              value={formData.latitude}
-              onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="e.g. 32.5411"
+              rows={4}
+              placeholder="Instructions for guides or travelers..."
+              className={inputClassName}
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="longitude"
-              className="mb-1 block text-sm font-medium text-gray-700"
-            >
-              Longitude
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div>
+              <label htmlFor="latitude" className={labelClassName}>
+                Latitude
+              </label>
+
+              <input
+                id="latitude"
+                name="latitude"
+                type="text"
+                value={formData.latitude}
+                onChange={handleChange}
+                placeholder="e.g. 32.5411"
+                className={inputClassName}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="longitude" className={labelClassName}>
+                Longitude
+              </label>
+
+              <input
+                id="longitude"
+                name="longitude"
+                type="text"
+                value={formData.longitude}
+                onChange={handleChange}
+                placeholder="e.g. -116.9700"
+                className={inputClassName}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-md border bg-card-secondary px-4 py-3">
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                id="active"
+                name="active"
+                type="checkbox"
+                checked={formData.active}
+                onChange={handleActiveChange}
+                className="h-4 w-4 rounded border"
+              />
+
+              <span className="text-sm font-medium">Active</span>
             </label>
 
-            <input
-              id="longitude"
-              name="longitude"
-              type="text"
-              value={formData.longitude}
-              onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="e.g. -116.9700"
-            />
+            <p className="mt-1 pl-7 text-xs text-muted-foreground">
+              Active pickup locations are available when scheduling tours.
+            </p>
           </div>
-        </div>
 
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={formData.active}
-            onChange={handleActiveChange}
-            className="h-4 w-4 rounded border-gray-300"
-          />
+          {error && (
+            <div
+              className="rounded-md border border-error/30 bg-error/10 px-4 py-3 text-sm text-error"
+              role="alert"
+            >
+              {error}
+            </div>
+          )}
 
-          <span className="text-sm text-gray-700">Active</span>
-        </label>
+          <div className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={() => router.push("/admin/catalogs/pickup-locations")}
+              disabled={isSubmitting}
+              className="w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:bg-card-secondary disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            >
+              Cancel
+            </button>
 
-        {error && (
-          <div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            >
+              {isSubmitting
+                ? "Saving..."
+                : initialData
+                  ? "Update Pickup Location"
+                  : "Create Pickup Location"}
+            </button>
           </div>
-        )}
-
-        <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            {isSubmitting
-              ? "Saving..."
-              : initialData
-                ? "Update Pickup Location"
-                : "Create Pickup Location"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push("/admin/catalogs/pickup-locations")}
-            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </section>
   );
 }

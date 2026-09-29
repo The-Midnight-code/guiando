@@ -23,24 +23,26 @@ export default async function EditAffiliatePage({
   }
 
   return (
-    <main className="space-y-6">
-      <div>
+    <main className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
         <Link
           href="/admin/catalogs/affiliates"
-          className="text-sm text-blue-600 hover:text-blue-800"
+          className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           ← Back to Affiliates
         </Link>
       </div>
 
-      <AffiliateForm
-        initialData={{
-          id: affiliate.id,
-          name: affiliate.name,
-          description: affiliate.description,
-          active: affiliate.active,
-        }}
-      />
+      <div className="mx-auto max-w-5xl">
+        <AffiliateForm
+          initialData={{
+            id: affiliate.id,
+            name: affiliate.name,
+            description: affiliate.description,
+            active: affiliate.active,
+          }}
+        />
+      </div>
     </main>
   );
 }

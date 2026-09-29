@@ -1,4 +1,5 @@
 "use client";
+
 import TourActions from "./TourActions";
 import DeleteTourButton from "./DeleteTourButton";
 
@@ -32,7 +33,7 @@ export default function ToursTable({ tours }: ToursTableProps) {
       ) : (
         <>
           {/* Desktop */}
-          <div className="hidden overflow-x-auto md:block">
+          <div className="hidden overflow-x-auto lg:block">
             <table className="min-w-full">
               <thead className="border-b bg-card-secondary">
                 <tr>
@@ -119,12 +120,8 @@ export default function ToursTable({ tours }: ToursTableProps) {
                     </td>
 
                     <td className="px-4 py-4">
-                      <div className="flex items-center justify-end gap-4">
-                        <div className="flex items-center justify-end gap-3">
-                          <TourActions id={tour.id} />
-
-                          <DeleteTourButton id={tour.id} name={tour.name} />
-                        </div>
+                      <div className="flex items-center justify-end gap-3">
+                        <TourActions id={tour.id} />
 
                         <DeleteTourButton id={tour.id} name={tour.name} />
                       </div>
@@ -135,26 +132,26 @@ export default function ToursTable({ tours }: ToursTableProps) {
             </table>
           </div>
 
-          {/* Mobile */}
-          <div className="divide-y md:hidden">
+          {/* Mobile / Tablet */}
+          <div className="divide-y lg:hidden">
             {tours.map((tour) => (
               <div
                 key={tour.id}
-                className="space-y-4 p-5 transition-colors hover:bg-card-secondary"
+                className="space-y-5 p-5 transition-colors hover:bg-card-secondary"
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
-                    <h2 className="truncate font-medium">{tour.name}</h2>
+                    <h2 className="font-medium">{tour.name}</h2>
 
                     {tour.description && (
-                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                      <p className="mt-1 text-sm leading-6 text-muted-foreground">
                         {tour.description}
                       </p>
                     )}
                   </div>
 
                   <span
-                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
+                    className={`w-fit shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
                       tour.active
                         ? "bg-green-500/15 text-success"
                         : "bg-card-secondary text-muted-foreground"
@@ -164,53 +161,54 @@ export default function ToursTable({ tours }: ToursTableProps) {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Product ID
                     </p>
+
                     <p className="mt-1">{tour.productId ?? "—"}</p>
                   </div>
 
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Type
                     </p>
+
                     <p className="mt-1">{tour.tourType?.name ?? "—"}</p>
                   </div>
 
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Class
                     </p>
+
                     <p className="mt-1">{tour.tourClass?.name ?? "—"}</p>
                   </div>
 
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Duration
                     </p>
+
                     <p className="mt-1">
                       {tour.duration != null ? `${tour.duration} min` : "—"}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Price
                     </p>
+
                     <p className="mt-1">
                       {tour.price != null ? `$${tour.price}` : "—"}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-4 border-t pt-4">
-                  <div className="flex items-center justify-end gap-3 border-t pt-4">
-                    <TourActions id={tour.id} />
-
-                    <DeleteTourButton id={tour.id} name={tour.name} />
-                  </div>
+                <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-end">
+                  <TourActions id={tour.id} />
 
                   <DeleteTourButton id={tour.id} name={tour.name} />
                 </div>

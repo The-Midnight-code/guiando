@@ -23,27 +23,29 @@ export default async function EditPickupLocationPage({
   }
 
   return (
-    <main className="space-y-6">
-      <div>
+    <main className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
         <Link
           href="/admin/catalogs/pickup-locations"
-          className="text-sm text-blue-600 hover:text-blue-800"
+          className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           ← Back to Pickup Locations
         </Link>
       </div>
 
-      <PickupLocationForm
-        initialData={{
-          id: pickupLocation.id,
-          name: pickupLocation.name,
-          address: pickupLocation.address,
-          instructions: pickupLocation.instructions,
-          latitude: pickupLocation.latitude,
-          longitude: pickupLocation.longitude,
-          active: pickupLocation.active,
-        }}
-      />
+      <div className="mx-auto max-w-5xl">
+        <PickupLocationForm
+          initialData={{
+            id: pickupLocation.id,
+            name: pickupLocation.name,
+            address: pickupLocation.address,
+            instructions: pickupLocation.instructions,
+            latitude: pickupLocation.latitude,
+            longitude: pickupLocation.longitude,
+            active: pickupLocation.active,
+          }}
+        />
+      </div>
     </main>
   );
 }
