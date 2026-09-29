@@ -7,6 +7,8 @@ import {
   createPickupLocationAction,
   updatePickupLocationAction,
 } from "./actions";
+import PickupLocationMap from "./PickUpLocationMap";
+import LocationSearch from "./LocationSearch";
 
 interface PickupLocationFormProps {
   initialData?: {
@@ -54,6 +56,23 @@ export default function PickupLocationForm({
       active: event.target.checked,
     }));
   };
+
+  const handleLocationChange = (
+    latitude: number,
+    longitude: number,
+    address?: string,
+  ) => {
+    setFormData((current) => ({
+      ...current,
+      latitude: latitude.toFixed(6),
+      longitude: longitude.toFixed(6),
+      ...(address ? { address } : {}),
+    }));
+  };
+
+  const latitude = formData.latitude ? Number(formData.latitude) : null;
+
+  const longitude = formData.longitude ? Number(formData.longitude) : null;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -160,6 +179,13 @@ export default function PickupLocationForm({
                 placeholder="Enter the pickup address"
                 className={inputClassName}
               />
+
+              <div className="mt-3">
+                <LocationSearch
+                  query={formData.address}
+                  onLocationFound={handleLocationChange}
+                />
+              </div>
             </div>
           </div>
 
@@ -176,6 +202,21 @@ export default function PickupLocationForm({
               rows={4}
               placeholder="Instructions for guides or travelers..."
               className={inputClassName}
+            />
+          </div>
+
+          <div>
+            <label className={labelClassName}>Location</label>
+
+            <p className="mb-3 text-sm text-muted-foreground">
+              Search the address above or click on the map to select the pickup
+              location.
+            </p>
+
+            <PickupLocationMap
+              latitude={latitude}
+              longitude={longitude}
+              onLocationChange={handleLocationChange}
             />
           </div>
 
