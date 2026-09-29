@@ -1,4 +1,5 @@
-import Link from "next/link";
+"use client";
+import TourActions from "./TourActions";
 import DeleteTourButton from "./DeleteTourButton";
 
 interface Tour {
@@ -23,121 +24,201 @@ interface ToursTableProps {
 
 export default function ToursTable({ tours }: ToursTableProps) {
   return (
-    <div className="overflow-hidden rounded-lg  bg-[#1E293B]">
-      <table className="min-w-full divide-y">
-        <thead className="bg-[#3B82F6]">
-          <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
-              Product ID
-            </th>
+    <div className="rounded-xl border bg-card">
+      {tours.length === 0 ? (
+        <div className="px-4 py-10 text-center text-sm text-muted-foreground">
+          No tours found.
+        </div>
+      ) : (
+        <>
+          {/* Desktop */}
+          <div className="hidden overflow-x-auto md:block">
+            <table className="min-w-full">
+              <thead className="border-b bg-card-secondary">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Product ID
+                  </th>
 
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
-              Tour
-            </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Tour
+                  </th>
 
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
-              Type
-            </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Type
+                  </th>
 
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
-              Class
-            </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Class
+                  </th>
 
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
-              Duration
-            </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Duration
+                  </th>
 
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
-              Price
-            </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Price
+                  </th>
 
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase">
-              Status
-            </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Status
+                  </th>
 
-            <th className="px-4 py-3 text-right text-xs font-medium uppercase">
-              Actions
-            </th>
-          </tr>
-        </thead>
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
 
-        <tbody>
-          {tours.map((tour) => (
-            <tr key={tour.id} className="hover:bg-[#2563EB]">
-              <td className="px-4 py-3 text-sm">{tour.productId ?? "—"}</td>
+              <tbody className="divide-y">
+                {tours.map((tour) => (
+                  <tr
+                    key={tour.id}
+                    className="transition-colors hover:bg-card-secondary"
+                  >
+                    <td className="px-4 py-4 text-sm">
+                      {tour.productId ?? "—"}
+                    </td>
 
-              <td className="px-4 py-3">
-                <div className="font-medium">{tour.name}</div>
+                    <td className="px-4 py-4">
+                      <div className="font-medium">{tour.name}</div>
 
-                {tour.description && (
-                  <div className="max-w-xs truncate text-sm text-[#94A3B8]">
-                    {tour.description}
+                      {tour.description && (
+                        <div className="mt-1 max-w-xs truncate text-sm text-muted-foreground">
+                          {tour.description}
+                        </div>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-4 text-sm">
+                      {tour.tourType?.name ?? "—"}
+                    </td>
+
+                    <td className="px-4 py-4 text-sm">
+                      {tour.tourClass?.name ?? "—"}
+                    </td>
+
+                    <td className="px-4 py-4 text-sm">
+                      {tour.duration != null ? `${tour.duration} min` : "—"}
+                    </td>
+
+                    <td className="px-4 py-4 text-sm">
+                      {tour.price != null ? `$${tour.price}` : "—"}
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                          tour.active
+                            ? "bg-green-500/15 text-success"
+                            : "bg-card-secondary text-muted-foreground"
+                        }`}
+                      >
+                        {tour.active ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <div className="flex items-center justify-end gap-4">
+                        <div className="flex items-center justify-end gap-3">
+                          <TourActions id={tour.id} />
+
+                          <DeleteTourButton id={tour.id} name={tour.name} />
+                        </div>
+
+                        <DeleteTourButton id={tour.id} name={tour.name} />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile */}
+          <div className="divide-y md:hidden">
+            {tours.map((tour) => (
+              <div
+                key={tour.id}
+                className="space-y-4 p-5 transition-colors hover:bg-card-secondary"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <h2 className="truncate font-medium">{tour.name}</h2>
+
+                    {tour.description && (
+                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                        {tour.description}
+                      </p>
+                    )}
                   </div>
-                )}
-              </td>
 
-              <td className="px-4 py-3 text-sm">
-                {tour.tourType?.name ?? "—"}
-              </td>
-
-              <td className="px-4 py-3 text-sm">
-                {tour.tourClass?.name ?? "—"}
-              </td>
-
-              <td className="px-4 py-3 text-sm">
-                {tour.duration != null ? `${tour.duration} min` : "—"}
-              </td>
-
-              <td className="px-4 py-3 text-sm">
-                {tour.price != null ? `$${tour.price}` : "—"}
-              </td>
-
-              <td className="px-4 py-3">
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-                    tour.active
-                      ? "bg-[#10B981] text-green-800"
-                      : "bg-[#64748B] text-gray-800"
-                  }`}
-                >
-                  {tour.active ? "Active" : "Inactive"}
-                </span>
-              </td>
-
-              <td className="px-4 py-3">
-                <div className="flex items-center justify-end gap-3">
-                  <Link
-                    href={`/admin/tours/${tour.id}`}
-                    className="text-sm font-medium text-[#38BDF8]"
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
+                      tour.active
+                        ? "bg-green-500/15 text-success"
+                        : "bg-card-secondary text-muted-foreground"
+                    }`}
                   >
-                    View
-                  </Link>
+                    {tour.active ? "Active" : "Inactive"}
+                  </span>
+                </div>
 
-                  <Link
-                    href={`/admin/tours/${tour.id}/edit`}
-                    className="text-sm font-medium text-[#F59E0B]"
-                  >
-                    Edit
-                  </Link>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Product ID
+                    </p>
+                    <p className="mt-1">{tour.productId ?? "—"}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Type
+                    </p>
+                    <p className="mt-1">{tour.tourType?.name ?? "—"}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Class
+                    </p>
+                    <p className="mt-1">{tour.tourClass?.name ?? "—"}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Duration
+                    </p>
+                    <p className="mt-1">
+                      {tour.duration != null ? `${tour.duration} min` : "—"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Price
+                    </p>
+                    <p className="mt-1">
+                      {tour.price != null ? `$${tour.price}` : "—"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-4 border-t pt-4">
+                  <div className="flex items-center justify-end gap-3 border-t pt-4">
+                    <TourActions id={tour.id} />
+
+                    <DeleteTourButton id={tour.id} name={tour.name} />
+                  </div>
 
                   <DeleteTourButton id={tour.id} name={tour.name} />
                 </div>
-              </td>
-            </tr>
-          ))}
-
-          {tours.length === 0 && (
-            <tr>
-              <td
-                colSpan={8}
-                className="px-4 py-8 text-center text-sm text-gray-500"
-              >
-                No tours found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

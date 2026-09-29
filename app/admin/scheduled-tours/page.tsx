@@ -54,11 +54,11 @@ export default async function ScheduledToursPage({
   });
 
   return (
-    <main className="p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Scheduled Tours</h1>
+    <main className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div>
+        <h1 className="text-2xl font-semibold">Scheduled Tours</h1>
 
-        <p className="text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Manage scheduled tours and assignments.
         </p>
       </div>

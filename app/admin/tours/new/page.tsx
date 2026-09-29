@@ -10,14 +10,19 @@ export default async function NewTourPage() {
   ]);
 
   return (
-    <main className="space-y-6">
-      <div>
-        <Link href="/admin/tours" className="text-sm text-[#3B82F6]">
+    <main className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
+        <Link
+          href="/admin/tours"
+          className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
           ← Back to Tours
         </Link>
       </div>
 
-      <TourForm tourTypes={tourTypes} tourClasses={tourClasses} />
+      <div className="mx-auto max-w-5xl">
+        <TourForm tourTypes={tourTypes} tourClasses={tourClasses} />
+      </div>
     </main>
   );
 }

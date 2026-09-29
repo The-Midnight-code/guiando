@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FiTrash2 } from "react-icons/fi";
 
 import { deleteScheduledTourAction } from "./actions";
-import { FiTrash2 } from "react-icons/fi";
+
 interface DeleteScheduledTourButtonProps {
   externalId: number;
 }
@@ -48,11 +49,18 @@ export default function DeleteScheduledTourButton({
 
   return (
     <div>
-      <FiTrash2
+      <button
+        type="button"
         onClick={handleDelete}
-        className="text-error text-lg"
-      ></FiTrash2>
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+        disabled={isDeleting}
+        aria-label="Delete scheduled tour"
+        title="Delete scheduled tour"
+        className="rounded-md p-2 text-error transition-colors hover:bg-error/10 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <FiTrash2 className="text-base" />
+      </button>
+
+      {error && <p className="mt-1 text-xs text-error">{error}</p>}
     </div>
   );
 }

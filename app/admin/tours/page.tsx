@@ -8,19 +8,19 @@ export default async function ToursPage() {
   const tours = await getTours();
 
   return (
-    <main className="p-8">
-      <div className="mb-6 flex items-center justify-between">
+    <main className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Tours</h1>
+          <h1 className="text-2xl font-semibold">Tours</h1>
 
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Manage tour definitions and information.
           </p>
         </div>
 
         <Link
           href="/admin/tours/new"
-          className="rounded-md bg-[#3B82F6] px-4 py-2 text-sm font-medium"
+          className="w-full rounded-md bg-primary px-4 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-primary-hover sm:w-auto"
         >
           New Tour
         </Link>

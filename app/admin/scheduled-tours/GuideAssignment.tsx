@@ -99,66 +99,94 @@ export default function GuideAssignment({
   };
 
   return (
-    <section className="rounded-lg bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-gray-900">Guides</h2>
+    <section className="rounded-xl border bg-card">
+      <div className="border-b px-6 py-5">
+        <h2 className="font-semibold">Guides</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Manage the guides assigned to this scheduled tour.
+        </p>
+      </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="space-y-5 p-6">
         {assignedGuides.length === 0 ? (
-          <p className="text-sm text-gray-500">No guides assigned.</p>
+          <div className="rounded-md border border-dashed px-4 py-6 text-center">
+            <p className="text-sm font-medium">No guides assigned</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Assign a guide using the selector below.
+            </p>
+          </div>
         ) : (
-          assignedGuides.map((assignment) => (
-            <div
-              key={assignment.id}
-              className="flex items-center justify-between rounded-md border p-3"
+          <div className="space-y-3">
+            {assignedGuides.map((assignment) => (
+              <div
+                key={assignment.id}
+                className="flex flex-col gap-3 rounded-md border p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <p className="text-sm font-medium">
+                    {assignment.guide
+                      ? getGuideName(assignment.guide)
+                      : "Unknown Guide"}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleRemove(assignment.guideId)}
+                  disabled={isSubmitting}
+                  className="w-full rounded-md border px-3 py-2 text-sm font-medium text-error transition-colors hover:bg-error/10 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {availableGuides.length > 0 && (
+          <div className="border-t pt-5">
+            <label
+              htmlFor="guide"
+              className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
             >
-              <span className="text-sm font-medium">
-                {assignment.guide
-                  ? getGuideName(assignment.guide)
-                  : "Unknown Guide"}
-              </span>
+              Assign guide
+            </label>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <select
+                id="guide"
+                value={selectedGuideId}
+                onChange={(event) => setSelectedGuideId(event.target.value)}
+                disabled={isSubmitting}
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary sm:flex-1"
+              >
+                <option value="">Select guide...</option>
+
+                {availableGuides.map((guide) => (
+                  <option key={guide.id} value={guide.id}>
+                    {getGuideName(guide)}
+                  </option>
+                ))}
+              </select>
 
               <button
                 type="button"
-                onClick={() => handleRemove(assignment.guideId)}
-                disabled={isSubmitting}
-                className="rounded-md bg-red-600 px-3 py-2 text-sm text-white disabled:opacity-50"
+                onClick={handleAssign}
+                disabled={!selectedGuideId || isSubmitting}
+                className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
-                Remove
+                {isSubmitting ? "Saving..." : "Assign"}
               </button>
             </div>
-          ))
+          </div>
+        )}
+
+        {error && (
+          <p className="text-sm text-error" role="alert">
+            {error}
+          </p>
         )}
       </div>
-
-      {availableGuides.length > 0 && (
-        <div className="mt-5 flex gap-2">
-          <select
-            value={selectedGuideId}
-            onChange={(event) => setSelectedGuideId(event.target.value)}
-            disabled={isSubmitting}
-            className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
-          >
-            <option value="">Select guide...</option>
-
-            {availableGuides.map((guide) => (
-              <option key={guide.id} value={guide.id}>
-                {getGuideName(guide)}
-              </option>
-            ))}
-          </select>
-
-          <button
-            type="button"
-            onClick={handleAssign}
-            disabled={!selectedGuideId || isSubmitting}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-          >
-            {isSubmitting ? "Saving..." : "Assign"}
-          </button>
-        </div>
-      )}
-
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
     </section>
   );
 }

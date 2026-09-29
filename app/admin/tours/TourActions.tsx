@@ -2,16 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiMoreVertical, FiEye, FiEdit } from "react-icons/fi";
+import { FiEdit, FiEye, FiMoreVertical } from "react-icons/fi";
 
-interface ScheduledTourActionsProps {
-  externalId: number;
+interface TourActionsProps {
+  id: string;
 }
 
-export default function ScheduledTourActions({
-  externalId,
-}: ScheduledTourActionsProps) {
+export default function TourActions({ id }: TourActionsProps) {
   const router = useRouter();
+
   const [open, setOpen] = useState(false);
 
   return (
@@ -28,12 +27,12 @@ export default function ScheduledTourActions({
       </button>
 
       {open && (
-        <div className="mt-2 w-full overflow-hidden rounded-md border bg-card">
+        <div className="absolute right-0 z-10 mt-2 w-40 overflow-hidden rounded-md border bg-card shadow-lg">
           <button
             type="button"
             onClick={() => {
               setOpen(false);
-              router.push(`/admin/scheduled-tours/${externalId}`);
+              router.push(`/admin/tours/${id}`);
             }}
             className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-card-secondary"
           >
@@ -45,7 +44,7 @@ export default function ScheduledTourActions({
             type="button"
             onClick={() => {
               setOpen(false);
-              router.push(`/admin/scheduled-tours/${externalId}/edit`);
+              router.push(`/admin/tours/${id}/edit`);
             }}
             className="flex w-full items-center gap-3 border-t px-4 py-3 text-left text-sm transition-colors hover:bg-card-secondary"
           >

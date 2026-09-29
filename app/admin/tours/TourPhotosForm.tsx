@@ -178,232 +178,259 @@ export default function TourPhotosForm({
     }
   };
 
-  return (
-    <section className="rounded-lg bg-white p-6 shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">Tour Photos</h2>
+  const inputClassName =
+    "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary";
 
-        <p className="mt-1 text-sm text-gray-500">
+  const labelClassName =
+    "mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground";
+
+  return (
+    <section className="rounded-xl border bg-card">
+      <div className="border-b px-6 py-5">
+        <h2 className="font-semibold">Tour Photos</h2>
+
+        <p className="mt-1 text-sm text-muted-foreground">
           Add and manage photos for this tour.
         </p>
       </div>
 
-      <form onSubmit={handleAdd} className="mb-8 space-y-4">
-        <div>
-          <label
-            htmlFor="photo-url"
-            className="mb-1 block text-sm font-medium text-gray-700"
-          >
-            Image URL
-          </label>
-
-          <input
-            id="photo-url"
-            type="url"
-            value={url}
-            onChange={(event) => setUrl(event.target.value)}
-            placeholder="https://example.com/image.jpg"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="photo-alt"
-            className="mb-1 block text-sm font-medium text-gray-700"
-          >
-            Alt Text
-          </label>
-
-          <input
-            id="photo-alt"
-            type="text"
-            value={alt}
-            onChange={(event) => setAlt(event.target.value)}
-            placeholder="Description of the image"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          />
-        </div>
-
-        <div className="max-w-xs">
-          <label
-            htmlFor="photo-sort-order"
-            className="mb-1 block text-sm font-medium text-gray-700"
-          >
-            Sort Order
-          </label>
-
-          <input
-            id="photo-sort-order"
-            type="number"
-            min="0"
-            value={sortOrder}
-            onChange={(event) => setSortOrder(event.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          />
-        </div>
-
-        {error && <p className="text-sm text-red-600">{error}</p>}
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+      <div className="space-y-6 p-6">
+        <form
+          onSubmit={handleAdd}
+          className="rounded-lg border bg-card-secondary p-5"
         >
-          {isSubmitting ? "Adding..." : "Add Photo"}
-        </button>
-      </form>
+          <div className="mb-5">
+            <h3 className="text-sm font-semibold">Add Photo</h3>
 
-      {photos.length === 0 ? (
-        <p className="text-sm text-gray-500">No photos added yet.</p>
-      ) : (
-        <div className="space-y-4">
-          {photos
-            .slice()
-            .sort((a, b) => a.sortOrder - b.sortOrder)
-            .map((photo) => (
-              <div
-                key={photo.id}
-                className="flex flex-col gap-4 rounded-lg border border-gray-200 p-4 md:flex-row md:items-center"
-              >
-                <div className="h-32 w-full overflow-hidden rounded-md bg-gray-100 md:w-48">
-                  <img
-                    src={photo.url}
-                    alt={photo.alt ?? "Tour photo"}
-                    className="h-full w-full object-cover"
-                  />
+            <p className="mt-1 text-sm text-muted-foreground">
+              Add an image URL and optional metadata.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <label htmlFor="photo-url" className={labelClassName}>
+                Image URL
+              </label>
+
+              <input
+                id="photo-url"
+                type="url"
+                value={url}
+                onChange={(event) => setUrl(event.target.value)}
+                placeholder="https://example.com/image.jpg"
+                className={inputClassName}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="photo-alt" className={labelClassName}>
+                Alt Text
+              </label>
+
+              <input
+                id="photo-alt"
+                type="text"
+                value={alt}
+                onChange={(event) => setAlt(event.target.value)}
+                placeholder="Description of the image"
+                className={inputClassName}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="photo-sort-order" className={labelClassName}>
+                Sort Order
+              </label>
+
+              <input
+                id="photo-sort-order"
+                type="number"
+                min="0"
+                value={sortOrder}
+                onChange={(event) => setSortOrder(event.target.value)}
+                className={inputClassName}
+              />
+            </div>
+          </div>
+
+          {error && (
+            <div
+              className="mt-4 rounded-md border border-error/30 bg-error/10 px-4 py-3 text-sm text-error"
+              role="alert"
+            >
+              {error}
+            </div>
+          )}
+
+          <div className="mt-5 border-t pt-5">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            >
+              {isSubmitting ? "Adding..." : "Add Photo"}
+            </button>
+          </div>
+        </form>
+
+        {photos.length === 0 ? (
+          <div className="rounded-md border border-dashed px-4 py-8 text-center">
+            <p className="text-sm font-medium">No photos added yet</p>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              Add a photo using the form above.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {photos
+              .slice()
+              .sort((a, b) => a.sortOrder - b.sortOrder)
+              .map((photo) => (
+                <div
+                  key={photo.id}
+                  className="flex flex-col gap-5 rounded-lg border p-4 transition-colors hover:bg-card-secondary md:flex-row"
+                >
+                  <div className="h-48 w-full shrink-0 overflow-hidden rounded-md bg-card-secondary md:h-32 md:w-48">
+                    <img
+                      src={photo.url}
+                      alt={photo.alt ?? "Tour photo"}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+
+                  {editingId === photo.id ? (
+                    <form
+                      onSubmit={handleUpdate}
+                      className="min-w-0 flex-1 space-y-4"
+                    >
+                      <div>
+                        <label
+                          htmlFor={`edit-url-${photo.id}`}
+                          className={labelClassName}
+                        >
+                          Image URL
+                        </label>
+
+                        <input
+                          id={`edit-url-${photo.id}`}
+                          type="url"
+                          value={editForm.url}
+                          onChange={(event) =>
+                            setEditForm((current) => ({
+                              ...current,
+                              url: event.target.value,
+                            }))
+                          }
+                          className={inputClassName}
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor={`edit-alt-${photo.id}`}
+                          className={labelClassName}
+                        >
+                          Alt Text
+                        </label>
+
+                        <input
+                          id={`edit-alt-${photo.id}`}
+                          type="text"
+                          value={editForm.alt}
+                          onChange={(event) =>
+                            setEditForm((current) => ({
+                              ...current,
+                              alt: event.target.value,
+                            }))
+                          }
+                          className={inputClassName}
+                        />
+                      </div>
+
+                      <div className="max-w-xs">
+                        <label
+                          htmlFor={`edit-sort-order-${photo.id}`}
+                          className={labelClassName}
+                        >
+                          Sort Order
+                        </label>
+
+                        <input
+                          id={`edit-sort-order-${photo.id}`}
+                          type="number"
+                          min="0"
+                          value={editForm.sortOrder}
+                          onChange={(event) =>
+                            setEditForm((current) => ({
+                              ...current,
+                              sortOrder: event.target.value,
+                            }))
+                          }
+                          className={inputClassName}
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row">
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                        >
+                          {isSubmitting ? "Saving..." : "Save"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleCancelEdit}
+                          disabled={isSubmitting}
+                          className="w-full rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-card sm:w-auto"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="flex min-w-0 flex-1 flex-col gap-4">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">
+                          {photo.url}
+                        </p>
+
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {photo.alt || "No alt text"}
+                        </p>
+
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Order: {photo.sortOrder}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-4 border-t pt-4">
+                        <button
+                          type="button"
+                          onClick={() => handleEdit(photo)}
+                          className="text-sm font-medium text-primary transition-colors hover:text-primary-hover"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(photo.id)}
+                          className="text-sm font-medium text-error transition-colors hover:text-error/80"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {editingId === photo.id ? (
-                  <form
-                    onSubmit={handleUpdate}
-                    className="min-w-0 flex-1 space-y-3"
-                  >
-                    <div>
-                      <label
-                        htmlFor={`edit-url-${photo.id}`}
-                        className="mb-1 block text-sm font-medium text-gray-700"
-                      >
-                        Image URL
-                      </label>
-
-                      <input
-                        id={`edit-url-${photo.id}`}
-                        type="url"
-                        value={editForm.url}
-                        onChange={(event) =>
-                          setEditForm((current) => ({
-                            ...current,
-                            url: event.target.value,
-                          }))
-                        }
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                      />
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor={`edit-alt-${photo.id}`}
-                        className="mb-1 block text-sm font-medium text-gray-700"
-                      >
-                        Alt Text
-                      </label>
-
-                      <input
-                        id={`edit-alt-${photo.id}`}
-                        type="text"
-                        value={editForm.alt}
-                        onChange={(event) =>
-                          setEditForm((current) => ({
-                            ...current,
-                            alt: event.target.value,
-                          }))
-                        }
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                      />
-                    </div>
-
-                    <div className="max-w-xs">
-                      <label
-                        htmlFor={`edit-sort-order-${photo.id}`}
-                        className="mb-1 block text-sm font-medium text-gray-700"
-                      >
-                        Sort Order
-                      </label>
-
-                      <input
-                        id={`edit-sort-order-${photo.id}`}
-                        type="number"
-                        min="0"
-                        value={editForm.sortOrder}
-                        onChange={(event) =>
-                          setEditForm((current) => ({
-                            ...current,
-                            sortOrder: event.target.value,
-                          }))
-                        }
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                      />
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                      >
-                        {isSubmitting ? "Saving..." : "Save"}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleCancelEdit}
-                        disabled={isSubmitting}
-                        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-gray-900">
-                        {photo.url}
-                      </p>
-
-                      <p className="mt-1 text-sm text-gray-500">
-                        {photo.alt || "No alt text"}
-                      </p>
-
-                      <p className="mt-1 text-xs text-gray-400">
-                        Order: {photo.sortOrder}
-                      </p>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => handleEdit(photo)}
-                        className="text-sm text-blue-600 hover:text-blue-800"
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(photo.id)}
-                        className="text-sm text-red-600 hover:text-red-800"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-        </div>
-      )}
+              ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 }

@@ -93,19 +93,25 @@ export default function TravelerForm({
   };
 
   return (
-    <div className="rounded-md border border-gray-200 bg-gray-50 p-4">
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-gray-900">
+    <div className="rounded-lg border bg-card-secondary p-5">
+      <div className="mb-5">
+        <h3 className="text-sm font-semibold">
           {initialData ? "Edit Traveler" : "Add Traveler"}
         </h3>
+
+        <p className="mt-1 text-sm text-muted-foreground">
+          {initialData
+            ? "Update the traveler information below."
+            : "Enter the traveler information below."}
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label
               htmlFor="firstName"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
             >
               First Name
             </label>
@@ -117,7 +123,7 @@ export default function TravelerForm({
               value={formData.firstName}
               onChange={handleChange}
               required
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
               placeholder="John"
             />
           </div>
@@ -125,7 +131,7 @@ export default function TravelerForm({
           <div>
             <label
               htmlFor="lastName"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
             >
               Last Name
             </label>
@@ -136,7 +142,7 @@ export default function TravelerForm({
               type="text"
               value={formData.lastName}
               onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
               placeholder="Smith"
             />
           </div>
@@ -146,7 +152,7 @@ export default function TravelerForm({
           <div>
             <label
               htmlFor="email"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
             >
               Email
             </label>
@@ -157,7 +163,7 @@ export default function TravelerForm({
               type="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
               placeholder="john@example.com"
             />
           </div>
@@ -165,7 +171,7 @@ export default function TravelerForm({
           <div>
             <label
               htmlFor="phone"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
             >
               Phone
             </label>
@@ -176,23 +182,26 @@ export default function TravelerForm({
               type="tel"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
               placeholder="+1 555-123-4567"
             />
           </div>
         </div>
 
         {error && (
-          <div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div
+            className="rounded-md border border-error/30 bg-error/10 px-4 py-3 text-sm text-error"
+            role="alert"
+          >
             {error}
           </div>
         )}
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {isSubmitting
               ? "Saving..."
@@ -205,7 +214,7 @@ export default function TravelerForm({
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            className="w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:bg-card disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             Cancel
           </button>

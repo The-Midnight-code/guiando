@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+
 import ScheduledTourActions from "./ScheduledTourActions";
 import DeleteScheduledTourButton from "./DeleteScheduledTourButton";
 import StatusBadge from "./StatusBadge";
@@ -71,160 +72,369 @@ export default function ScheduledToursTable({
     router.push(`/admin/scheduled-tours?${params.toString()}`);
   };
 
+  const getGuideName = (scheduledTour: ScheduledTour) => {
+    if (scheduledTour.guideAssignments.length === 0) {
+      return "Unassigned";
+    }
+
+    return (
+      scheduledTour.guideAssignments
+        .map((assignment) => {
+          const firstName = assignment.guide?.user?.firstName ?? "";
+          const lastName = assignment.guide?.user?.lastName ?? "";
+
+          return `${firstName} ${lastName}`.trim();
+        })
+        .filter(Boolean)
+        .join(", ") || "Unassigned"
+    );
+  };
+
   return (
-    <div>
-      <div className="mb-4 flex flex-col gap-3 md:flex-row">
-        <input
-          type="text"
-          value={search}
-          onChange={(event) =>
-            updateParams({
-              search: event.target.value,
-            })
-          }
-          placeholder="Search tours..."
-          className="rounded-md border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-        />
+    <div className="space-y-6">
+      <section className="rounded-xl border bg-card">
+        <div className="border-b px-6 py-5">
+          <div>
+            <h2 className="font-semibold">Filters</h2>
 
-        <select
-          value={status}
-          onChange={(event) =>
-            updateParams({
-              status: event.target.value,
-            })
-          }
-          className="rounded-md border px-4 py-2 text-sm"
-        >
-          <option value="all">All statuses</option>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Search, filter, and sort scheduled tours.
+            </p>
+          </div>
+        </div>
 
-          {Array.from(
-            new Set(
-              scheduledTours.map((scheduledTour) => scheduledTour.status),
-            ),
-          ).map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
-        <DateFilter
-          value={date}
-          onChange={(value) =>
-            updateParams({
-              date: value,
-            })
-          }
-        />
-        <select
-          value={sortBy}
-          onChange={(event) =>
-            updateParams({
-              sortBy: event.target.value,
-            })
-          }
-          className="rounded-md border px-4 py-2 text-sm"
-        >
-          <option value="date">Sort by Date</option>
-          <option value="startTime">Sort by Start Time</option>
-          <option value="tour">Sort by Tour</option>
-          <option value="status">Sort by Status</option>
-          <option value="guide">Sort by Guide</option>
-        </select>
+        <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="xl:col-span-2">
+            <label
+              htmlFor="search"
+              className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
+            >
+              Search
+            </label>
 
-        <select
-          value={sortDirection}
-          onChange={(event) =>
-            updateParams({
-              sortDirection: event.target.value,
-            })
-          }
-          className="rounded-md border px-4 py-2 text-sm"
-        >
-          <option value="asc">Ascending</option>
-          <option value="desc">Descending</option>
-        </select>
-        <select
-          value={pageSize}
-          onChange={(event) =>
-            updateParams({
-              pageSize: event.target.value,
-            })
-          }
-          className="rounded-md border px-4 py-2 text-sm"
-        >
-          <option value="10">10 per page</option>
-          <option value="20">20 per page</option>
-          <option value="50">50 per page</option>
-          <option value="100">100 per page</option>
-        </select>
-      </div>
+            <input
+              id="search"
+              type="text"
+              value={search}
+              onChange={(event) =>
+                updateParams({
+                  search: event.target.value,
+                })
+              }
+              placeholder="Search tours..."
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+            />
+          </div>
 
-      <div className="overflow-x-auto rounded-2xl cardBg">
-        <table className="min-w-full">
-          <thead>
-            <tr>
-              <th className="px-4 py-3">ID</th>
-              <th className="px-4 py-3">Tour</th>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Time</th>
-              <th className="px-4 py-3">Pickup</th>
-              <th className="px-4 py-3">Guide</th>
-              <th className="px-4 py-3">People</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Actions</th>
-            </tr>
-          </thead>
+          <div>
+            <label
+              htmlFor="status"
+              className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
+            >
+              Status
+            </label>
 
-          <tbody>
-            {scheduledTours.map((scheduledTour) => (
-              <tr key={scheduledTour.id}>
-                <td className="px-4 py-3 text-gray-500">
-                  {scheduledTour.externalId ?? "—"}
-                </td>
-                <td className="px-4 py-3 font-medium">
-                  {scheduledTour.tour?.name ?? "—"}
-                </td>
+            <select
+              id="status"
+              value={status}
+              onChange={(event) =>
+                updateParams({
+                  status: event.target.value,
+                })
+              }
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+            >
+              <option value="all">All statuses</option>
 
-                <td className="px-4 py-3">{scheduledTour.tourDate}</td>
+              {Array.from(
+                new Set(
+                  scheduledTours.map((scheduledTour) => scheduledTour.status),
+                ),
+              ).map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </div>
 
-                <td className="px-4 py-3">
-                  {scheduledTour.startTime ?? "—"}
-                  {" - "}
-                  {scheduledTour.endTime ?? "—"}
-                </td>
+          <div>
+            <label
+              htmlFor="date"
+              className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
+            >
+              Date
+            </label>
 
-                <td className="px-4 py-3">
-                  {scheduledTour.pickupLocation?.name ?? "—"}
-                </td>
+            <DateFilter
+              value={date}
+              onChange={(value) =>
+                updateParams({
+                  date: value,
+                })
+              }
+            />
+          </div>
 
-                <td className="px-4 py-3">
-                  {scheduledTour.guideAssignments.length > 0
-                    ? scheduledTour.guideAssignments
-                        .map((assignment) => {
-                          const firstName =
-                            assignment.guide?.user?.firstName ?? "";
+          <div>
+            <label
+              htmlFor="sortBy"
+              className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
+            >
+              Sort by
+            </label>
 
-                          const lastName =
-                            assignment.guide?.user?.lastName ?? "";
+            <select
+              id="sortBy"
+              value={sortBy}
+              onChange={(event) =>
+                updateParams({
+                  sortBy: event.target.value,
+                })
+              }
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+            >
+              <option value="date">Date</option>
+              <option value="startTime">Start Time</option>
+              <option value="tour">Tour</option>
+              <option value="status">Status</option>
+              <option value="guide">Guide</option>
+            </select>
+          </div>
 
-                          return `${firstName} ${lastName}`.trim();
-                        })
-                        .filter(Boolean)
-                        .join(", ") || "Unassigned"
-                    : "Unassigned"}
-                </td>
+          <div>
+            <label
+              htmlFor="sortDirection"
+              className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
+            >
+              Direction
+            </label>
 
-                <td className="px-4 py-3">
-                  {scheduledTour.numberOfPeople ?? 0}
-                </td>
+            <select
+              id="sortDirection"
+              value={sortDirection}
+              onChange={(event) =>
+                updateParams({
+                  sortDirection: event.target.value,
+                })
+              }
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+            >
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
 
-                <td className="px-4 py-3">
-                  <StatusBadge status={scheduledTour.status} />
-                </td>
+          <div>
+            <label
+              htmlFor="pageSize"
+              className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
+            >
+              Page size
+            </label>
 
-                <td className="px-4 py-3">
+            <select
+              id="pageSize"
+              value={pageSize}
+              onChange={(event) =>
+                updateParams({
+                  pageSize: event.target.value,
+                })
+              }
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+            >
+              <option value="10">10 per page</option>
+              <option value="20">20 per page</option>
+              <option value="50">50 per page</option>
+              <option value="100">100 per page</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      {scheduledTours.length === 0 ? (
+        <section className="rounded-xl border bg-card">
+          <div className="px-6 py-12 text-center">
+            <p className="text-sm font-medium">No scheduled tours found</p>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              Try adjusting your search or filters.
+            </p>
+          </div>
+        </section>
+      ) : (
+        <>
+          <section className="rounded-xl border bg-card">
+            <div className="hidden overflow-x-auto md:block">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      ID
+                    </th>
+
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Tour
+                    </th>
+
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Date
+                    </th>
+
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Time
+                    </th>
+
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Pickup
+                    </th>
+
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Guide
+                    </th>
+
+                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      People
+                    </th>
+
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Status
+                    </th>
+
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y">
+                  {scheduledTours.map((scheduledTour) => (
+                    <tr
+                      key={scheduledTour.id}
+                      className="transition-colors hover:bg-card-secondary"
+                    >
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {scheduledTour.externalId ?? "—"}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm font-medium">
+                        {scheduledTour.tour?.name ?? "—"}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm">
+                        {scheduledTour.tourDate}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {scheduledTour.startTime ?? "—"}
+                        {" - "}
+                        {scheduledTour.endTime ?? "—"}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {scheduledTour.pickupLocation?.name ?? "—"}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {getGuideName(scheduledTour)}
+                      </td>
+
+                      <td className="px-6 py-4 text-right text-sm text-muted-foreground">
+                        {scheduledTour.numberOfPeople ?? 0}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <StatusBadge status={scheduledTour.status} />
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {scheduledTour.externalId !== null && (
+                          <div className="flex items-center gap-2">
+                            <ScheduledTourActions
+                              externalId={scheduledTour.externalId}
+                            />
+
+                            <DeleteScheduledTourButton
+                              externalId={scheduledTour.externalId}
+                            />
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="divide-y md:hidden">
+              {scheduledTours.map((scheduledTour) => (
+                <div key={scheduledTour.id} className="px-6 py-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="font-medium">
+                        {scheduledTour.tour?.name ?? "—"}
+                      </p>
+
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        ID: {scheduledTour.externalId ?? "—"}
+                      </p>
+                    </div>
+
+                    <StatusBadge status={scheduledTour.status} />
+                  </div>
+
+                  <div className="mt-5 grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Date
+                      </p>
+
+                      <p className="mt-1">{scheduledTour.tourDate}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Time
+                      </p>
+
+                      <p className="mt-1">
+                        {scheduledTour.startTime ?? "—"}
+                        {" - "}
+                        {scheduledTour.endTime ?? "—"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Pickup
+                      </p>
+
+                      <p className="mt-1">
+                        {scheduledTour.pickupLocation?.name ?? "—"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Guide
+                      </p>
+
+                      <p className="mt-1">{getGuideName(scheduledTour)}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        People
+                      </p>
+
+                      <p className="mt-1">
+                        {scheduledTour.numberOfPeople ?? 0}
+                      </p>
+                    </div>
+                  </div>
+
                   {scheduledTour.externalId !== null && (
-                    <div className="flex items-center gap-2">
+                    <div className="mt-5 flex items-center gap-2 border-t pt-4">
                       <ScheduledTourActions
                         externalId={scheduledTour.externalId}
                       />
@@ -234,26 +444,20 @@ export default function ScheduledToursTable({
                       />
                     </div>
                   )}
-                </td>
-              </tr>
-            ))}
+                </div>
+              ))}
+            </div>
+          </section>
 
-            {scheduledTours.length === 0 && (
-              <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
-                  No scheduled tours found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              Showing {scheduledTours.length} of {total}
+            </p>
 
-      <Pagination page={page} totalPages={totalPages} />
-
-      <p className="mt-3 text-sm text-gray-500">
-        Showing {scheduledTours.length} of {total}
-      </p>
+            <Pagination page={page} totalPages={totalPages} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

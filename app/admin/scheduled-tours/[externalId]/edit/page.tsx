@@ -7,11 +7,10 @@ import {
 } from "@/lib/queries/catalogs";
 
 import { getActiveTours } from "@/lib/queries/tours";
-
 import { getScheduledTourById } from "@/lib/queries/scheduledTours";
+import { getTravelers } from "@/lib/queries/travelers";
 
 import ScheduledTourForm from "../../new/ScheduledTourForm";
-import { getTravelers } from "@/lib/queries/travelers";
 
 interface EditScheduledTourPageProps {
   params: Promise<{
@@ -51,12 +50,12 @@ export default async function EditScheduledTourPage({
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
+    <main className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Edit Scheduled Tour</h1>
+          <h1 className="text-2xl font-semibold">Edit Scheduled Tour</h1>
 
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             Update the scheduled tour information.
           </p>
         </div>

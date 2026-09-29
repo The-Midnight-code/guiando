@@ -48,7 +48,6 @@ export default function FinancialsForm({
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,13 +60,9 @@ export default function FinancialsForm({
   };
 
   const totalPaymentUsd = Number(formData.totalPaymentUsd) || 0;
-
   const exchangeRate = Number(formData.exchangeRate) || 0;
-
   const guideCostMxn = Number(formData.guideCostMxn) || 0;
-
   const transportationCostMxn = Number(formData.transportationCostMxn) || 0;
-
   const extraExpensesMxn = Number(formData.extraExpensesMxn) || 0;
 
   const totalTravelersCostMxn =
@@ -95,25 +90,15 @@ export default function FinancialsForm({
     try {
       const input = {
         totalPaymentUsd: formData.totalPaymentUsd || undefined,
-
         exchangeRate: formData.exchangeRate || undefined,
-
         guideCostMxn: formData.guideCostMxn || undefined,
-
         transportationCostMxn: formData.transportationCostMxn || undefined,
-
         travelersCostMxn: formData.travelersCostMxn || undefined,
-
         totalTravelersCostMxn: totalTravelersCostMxn.toFixed(2),
-
         extraExpensesMxn: formData.extraExpensesMxn || undefined,
-
         totalCostMxn: totalCostMxn.toFixed(2),
-
         totalCostUsd: totalCostUsd.toFixed(2),
-
         totalRevenueUsd: totalRevenueUsd.toFixed(2),
-
         revenuePercentage: revenuePercentage.toFixed(2),
       };
 
@@ -216,57 +201,81 @@ export default function FinancialsForm({
   };
 
   return (
-    <section className="rounded-lg bg-white p-6 shadow-sm">
-      <div className="mb-5">
-        <h2 className="text-lg font-semibold text-gray-900">Financials</h2>
-        <p className="text-xs text-gray-500">People: {numberOfPeople}</p>
+    <section className="rounded-xl border bg-card">
+      <div className="border-b px-6 py-5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="font-semibold">Financials</h2>
 
-        <p className="mt-1 text-sm text-gray-500">
-          Manage the financial information for this scheduled tour.
-        </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Manage the financial information for this scheduled tour.
+            </p>
+          </div>
+
+          <div className="rounded-md border bg-card-secondary px-3 py-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              People
+            </p>
+
+            <p className="mt-1 text-sm font-semibold">{numberOfPeople}</p>
+          </div>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {fields.map((field) => (
-            <div key={field.name}>
-              <label
-                htmlFor={field.name}
-                className="mb-1 block text-sm font-medium text-gray-700"
-              >
-                {field.label}
-              </label>
+      <div className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {fields.map((field) => (
+              <div key={field.name}>
+                <label
+                  htmlFor={field.name}
+                  className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                >
+                  {field.label}
+                </label>
 
-              <input
-                id={field.name}
-                name={field.name}
-                type="number"
-                step="0.01"
-                value={getFieldValue(field.name)}
-                onChange={handleChange}
-                readOnly={field.calculated}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              />
+                <input
+                  id={field.name}
+                  name={field.name}
+                  type="number"
+                  step="0.01"
+                  value={getFieldValue(field.name)}
+                  onChange={handleChange}
+                  readOnly={field.calculated}
+                  className={`w-full rounded-md border px-3 py-2 text-sm outline-none transition-colors focus:border-primary ${
+                    field.calculated
+                      ? "cursor-not-allowed bg-card-secondary text-muted-foreground"
+                      : "bg-background"
+                  }`}
+                />
+              </div>
+            ))}
+          </div>
+
+          {error && (
+            <div
+              className="rounded-md border border-error/30 bg-error/10 px-4 py-3 text-sm text-error"
+              role="alert"
+            >
+              {error}
             </div>
-          ))}
-        </div>
+          )}
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
-
-        <div>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-          >
-            {isSubmitting
-              ? "Saving..."
-              : initialData
-                ? "Update Financials"
-                : "Create Financials"}
-          </button>
-        </div>
-      </form>
+          <div className="border-t pt-5">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            >
+              {isSubmitting
+                ? "Saving..."
+                : initialData
+                  ? "Update Financials"
+                  : "Create Financials"}
+            </button>
+          </div>
+        </form>
+      </div>
     </section>
   );
 }

@@ -35,9 +35,7 @@ export default function TravelerAssignment({
   const router = useRouter();
 
   const [selectedTravelerId, setSelectedTravelerId] = useState("");
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
 
   const availableTravelers = travelers.filter(
@@ -103,33 +101,39 @@ export default function TravelerAssignment({
     <div>
       <div className="space-y-3">
         {assignedTravelers.length === 0 ? (
-          <p className="text-sm text-gray-500">No travelers assigned.</p>
+          <div className="rounded-md border border-dashed px-4 py-6 text-center">
+            <p className="text-sm font-medium">No travelers assigned</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Assign a traveler using the selector below.
+            </p>
+          </div>
         ) : (
           assignedTravelers.map((assignment) => (
             <div
               key={assignment.id}
-              className="flex items-center justify-between rounded-md border p-3"
+              className="flex flex-col gap-4 rounded-md border p-4 sm:flex-row sm:items-center sm:justify-between"
             >
-              <div>
-                <p className="text-sm font-medium text-gray-900">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">
                   {assignment.traveler
                     ? getTravelerName(assignment.traveler)
                     : "Unknown Traveler"}
                 </p>
 
                 {assignment.traveler?.email && (
-                  <p className="text-xs text-gray-500">
+                  <p className="mt-1 truncate text-xs text-muted-foreground">
                     {assignment.traveler.email}
                   </p>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="flex w-full items-center gap-2 sm:w-auto">
                 {assignment.traveler && (
                   <button
                     type="button"
                     onClick={() => onEdit(assignment.traveler!)}
                     disabled={isSubmitting}
-                    className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    className="flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-card-secondary disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
                   >
                     Edit
                   </button>
@@ -139,7 +143,7 @@ export default function TravelerAssignment({
                   type="button"
                   onClick={() => handleRemove(assignment.travelerId)}
                   disabled={isSubmitting}
-                  className="rounded-md bg-red-600 px-3 py-2 text-sm text-white disabled:opacity-50"
+                  className="flex-1 rounded-md border px-3 py-2 text-sm font-medium text-error transition-colors hover:bg-error/10 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
                 >
                   Remove
                 </button>
@@ -150,34 +154,48 @@ export default function TravelerAssignment({
       </div>
 
       {availableTravelers.length > 0 && (
-        <div className="mt-5 flex gap-2">
-          <select
-            value={selectedTravelerId}
-            onChange={(event) => setSelectedTravelerId(event.target.value)}
-            disabled={isSubmitting}
-            className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+        <div className="mt-5 border-t pt-5">
+          <label
+            htmlFor="traveler"
+            className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
           >
-            <option value="">Select traveler...</option>
+            Assign traveler
+          </label>
 
-            {availableTravelers.map((traveler) => (
-              <option key={traveler.id} value={traveler.id}>
-                {getTravelerName(traveler)}
-              </option>
-            ))}
-          </select>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <select
+              id="traveler"
+              value={selectedTravelerId}
+              onChange={(event) => setSelectedTravelerId(event.target.value)}
+              disabled={isSubmitting}
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary sm:flex-1"
+            >
+              <option value="">Select traveler...</option>
 
-          <button
-            type="button"
-            onClick={handleAssign}
-            disabled={!selectedTravelerId || isSubmitting}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-          >
-            {isSubmitting ? "Saving..." : "Assign"}
-          </button>
+              {availableTravelers.map((traveler) => (
+                <option key={traveler.id} value={traveler.id}>
+                  {getTravelerName(traveler)}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="button"
+              onClick={handleAssign}
+              disabled={!selectedTravelerId || isSubmitting}
+              className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            >
+              {isSubmitting ? "Saving..." : "Assign"}
+            </button>
+          </div>
         </div>
       )}
 
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="mt-3 text-sm text-error" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

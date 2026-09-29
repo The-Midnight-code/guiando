@@ -33,7 +33,6 @@ export default function TravelersSection({
   assignedTravelers,
 }: TravelersSectionProps) {
   const [showTravelerForm, setShowTravelerForm] = useState(false);
-
   const [editingTraveler, setEditingTraveler] = useState<Traveler | null>(null);
 
   const router = useRouter();
@@ -70,12 +69,12 @@ export default function TravelersSection({
   };
 
   return (
-    <section className="rounded-lg bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between">
+    <section className="rounded-xl border bg-card">
+      <div className="flex flex-col gap-4 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Travelers</h2>
+          <h2 className="font-semibold">Travelers</h2>
 
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Manage travelers assigned to this tour.
           </p>
         </div>
@@ -84,24 +83,36 @@ export default function TravelersSection({
           <button
             type="button"
             onClick={handleAddTraveler}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover sm:w-auto"
           >
             + New Traveler
           </button>
         )}
       </div>
 
-      {showTravelerForm && (
-        <div className="mt-5">
-          <TravelerForm
-            initialData={editingTraveler}
-            onSuccess={handleTravelerSuccess}
-            onCancel={handleCancel}
-          />
-        </div>
-      )}
+      <div className="p-6">
+        {showTravelerForm && (
+          <div className="mb-6 rounded-lg border bg-card-secondary p-5">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold">
+                {editingTraveler ? "Edit Traveler" : "New Traveler"}
+              </h3>
 
-      <div className="mt-5">
+              <p className="mt-1 text-sm text-muted-foreground">
+                {editingTraveler
+                  ? "Update the traveler information."
+                  : "Add a new traveler to this tour."}
+              </p>
+            </div>
+
+            <TravelerForm
+              initialData={editingTraveler}
+              onSuccess={handleTravelerSuccess}
+              onCancel={handleCancel}
+            />
+          </div>
+        )}
+
         <TravelerAssignment
           externalId={externalId}
           travelers={travelers}
