@@ -9,6 +9,8 @@ import {
   tours,
 } from "@/db/schema";
 
+import { clerkClient } from "@clerk/nextjs/server";
+
 export async function getActiveGuides() {
   return db.query.guides.findMany({
     where: {
@@ -171,4 +173,26 @@ export async function getGuideDashboardStats(userId: string) {
     today: todayResult[0]?.count ?? 0,
     confirmed: confirmedResult[0]?.count ?? 0,
   };
+}
+
+export async function getAdminGuides() {
+  return db.query.guides.findMany({
+    with: {
+      user: true,
+    },
+    orderBy: (guides, { asc }) => [asc(guides.createdAt)],
+  });
+}
+
+export async function getPendingGuideInvitations() {
+  const client = await clerkClient();
+
+  const { data } = await client.invitations.getInvitationList({
+    status: "pending",
+    limit: 100,
+  });
+
+  return data.filter(
+    (invitation) => invitation.publicMetadata?.role === "GUIDE",
+  );
 }

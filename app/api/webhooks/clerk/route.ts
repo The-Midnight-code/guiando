@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { Webhook } from "svix";
 
 import { db } from "@/db/db";
-import { users } from "@/db/schema";
+import { guides, users } from "@/db/schema";
 
 type ClerkUserEvent = {
   type: "user.created" | "user.updated";
@@ -15,6 +15,9 @@ type ClerkUserEvent = {
     }[];
     first_name: string | null;
     last_name: string | null;
+    public_metadata: {
+      role?: string;
+    };
   };
 };
 
@@ -106,14 +109,14 @@ export async function POST(request: Request) {
     });
   }
 
-  await db
+  const [syncedUser] = await db
     .insert(users)
     .values({
       clerkId: data.id,
       email,
       firstName: data.first_name,
       lastName: data.last_name,
-      role: "GUIDE",
+      role: data.public_metadata.role === "ADMIN" ? "ADMIN" : "GUIDE",
     })
     .onConflictDoUpdate({
       target: users.clerkId,
@@ -123,7 +126,23 @@ export async function POST(request: Request) {
         lastName: data.last_name,
         updatedAt: new Date(),
       },
+    })
+    .returning({
+      id: users.id,
+      role: users.role,
     });
+
+  if (syncedUser.role === "GUIDE") {
+    await db
+      .insert(guides)
+      .values({
+        userId: syncedUser.id,
+        active: true,
+      })
+      .onConflictDoNothing({
+        target: guides.userId,
+      });
+  }
 
   console.log("9. User synchronized:", data.id);
 
