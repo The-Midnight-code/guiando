@@ -93,17 +93,15 @@ export default function ScheduledToursTable({
   return (
     <div className="space-y-6">
       <section className="rounded-xl border bg-card">
-        <div className="border-b px-6 py-5">
-          <div>
-            <h2 className="font-semibold">Filters</h2>
+        <div className="px-6 py-5">
+          <h2 className="font-semibold">Filters</h2>
 
-            <p className="mt-1 text-sm text-muted-foreground">
-              Search, filter, and sort scheduled tours.
-            </p>
-          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Search, filter, and sort scheduled tours.
+          </p>
         </div>
 
-        <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <div className="xl:col-span-2">
             <label
               htmlFor="search"
@@ -122,7 +120,7 @@ export default function ScheduledToursTable({
                 })
               }
               placeholder="Search tours..."
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+              className="w-full rounded-md border bg-background px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
             />
           </div>
 
@@ -142,7 +140,7 @@ export default function ScheduledToursTable({
                   status: event.target.value,
                 })
               }
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+              className="w-full rounded-md border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-primary"
             >
               <option value="all">All statuses</option>
 
@@ -192,7 +190,7 @@ export default function ScheduledToursTable({
                   sortBy: event.target.value,
                 })
               }
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+              className="w-full rounded-md border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-primary"
             >
               <option value="date">Date</option>
               <option value="startTime">Start Time</option>
@@ -218,7 +216,7 @@ export default function ScheduledToursTable({
                   sortDirection: event.target.value,
                 })
               }
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+              className="w-full rounded-md border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-primary"
             >
               <option value="asc">Ascending</option>
               <option value="desc">Descending</option>
@@ -241,7 +239,7 @@ export default function ScheduledToursTable({
                   pageSize: event.target.value,
                 })
               }
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+              className="w-full rounded-md border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-primary"
             >
               <option value="10">10 per page</option>
               <option value="20">20 per page</option>
@@ -254,7 +252,7 @@ export default function ScheduledToursTable({
 
       {scheduledTours.length === 0 ? (
         <section className="rounded-xl border bg-card">
-          <div className="px-6 py-12 text-center">
+          <div className="px-6 py-14 text-center">
             <p className="text-sm font-medium">No scheduled tours found</p>
 
             <p className="mt-1 text-sm text-muted-foreground">
@@ -268,28 +266,28 @@ export default function ScheduledToursTable({
             <div className="hidden overflow-x-auto md:block">
               <table className="min-w-full">
                 <thead>
-                  <tr className="border-b">
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <tr className="border-b bg-card-secondary/40">
+                    <th className="px-6 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       ID
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <th className="px-6 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Tour
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <th className="px-6 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Date
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <th className="px-6 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Time
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <th className="px-6 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Pickup
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <th className="px-6 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Guide
                     </th>
 
@@ -297,11 +295,11 @@ export default function ScheduledToursTable({
                       People
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <th className="px-6 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Status
                     </th>
 
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <th className="px-6 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Actions
                     </th>
                   </tr>
@@ -311,43 +309,49 @@ export default function ScheduledToursTable({
                   {scheduledTours.map((scheduledTour) => (
                     <tr
                       key={scheduledTour.id}
-                      className="transition-colors hover:bg-card-secondary"
+                      className="transition-colors duration-150 hover:bg-card-secondary"
                     >
-                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                      <td className="px-6 py-3.5 text-sm text-muted-foreground">
                         {scheduledTour.externalId ?? "—"}
                       </td>
 
-                      <td className="px-6 py-4 text-sm font-medium">
-                        {scheduledTour.tour?.name ?? "—"}
+                      <td className="max-w-xs px-6 py-3.5 text-sm font-medium">
+                        <p className="truncate">
+                          {scheduledTour.tour?.name ?? "—"}
+                        </p>
                       </td>
 
-                      <td className="px-6 py-4 text-sm">
+                      <td className="px-6 py-3.5 text-sm">
                         {scheduledTour.tourDate}
                       </td>
 
-                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                      <td className="px-6 py-3.5 text-sm text-muted-foreground">
                         {scheduledTour.startTime ?? "—"}
                         {" - "}
                         {scheduledTour.endTime ?? "—"}
                       </td>
 
-                      <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {scheduledTour.pickupLocation?.name ?? "—"}
+                      <td className="max-w-xs px-6 py-3.5 text-sm text-muted-foreground">
+                        <p className="truncate">
+                          {scheduledTour.pickupLocation?.name ?? "—"}
+                        </p>
                       </td>
 
-                      <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {getGuideName(scheduledTour)}
+                      <td className="max-w-xs px-6 py-3.5 text-sm text-muted-foreground">
+                        <p className="truncate">
+                          {getGuideName(scheduledTour)}
+                        </p>
                       </td>
 
-                      <td className="px-6 py-4 text-right text-sm text-muted-foreground">
+                      <td className="px-6 py-3.5 text-right text-sm text-muted-foreground">
                         {scheduledTour.numberOfPeople ?? 0}
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-3.5">
                         <StatusBadge status={scheduledTour.status} />
                       </td>
 
-                      <td className="px-6 py-4">
+                      <td className="whitespace-nowrap px-6 py-3.5">
                         {scheduledTour.externalId !== null && (
                           <div className="flex items-center gap-2">
                             <ScheduledTourActions
@@ -368,10 +372,13 @@ export default function ScheduledToursTable({
 
             <div className="divide-y md:hidden">
               {scheduledTours.map((scheduledTour) => (
-                <div key={scheduledTour.id} className="px-6 py-5">
+                <div
+                  key={scheduledTour.id}
+                  className="px-6 py-5 transition-colors duration-150 hover:bg-card-secondary"
+                >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="font-medium">
+                      <p className="truncate font-medium">
                         {scheduledTour.tour?.name ?? "—"}
                       </p>
 
@@ -409,7 +416,7 @@ export default function ScheduledToursTable({
                         Pickup
                       </p>
 
-                      <p className="mt-1">
+                      <p className="mt-1 truncate">
                         {scheduledTour.pickupLocation?.name ?? "—"}
                       </p>
                     </div>
@@ -419,7 +426,9 @@ export default function ScheduledToursTable({
                         Guide
                       </p>
 
-                      <p className="mt-1">{getGuideName(scheduledTour)}</p>
+                      <p className="mt-1 truncate">
+                        {getGuideName(scheduledTour)}
+                      </p>
                     </div>
 
                     <div>
@@ -434,7 +443,7 @@ export default function ScheduledToursTable({
                   </div>
 
                   {scheduledTour.externalId !== null && (
-                    <div className="mt-5 flex items-center gap-2 border-t pt-4">
+                    <div className="mt-5 flex flex-wrap items-center gap-2 border-t pt-4">
                       <ScheduledTourActions
                         externalId={scheduledTour.externalId}
                       />
@@ -450,8 +459,8 @@ export default function ScheduledToursTable({
           </section>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
-              Showing {scheduledTours.length} of {total}
+            <p className="text-xs font-medium text-muted-foreground">
+              Showing {scheduledTours.length} of {total} scheduled tours
             </p>
 
             <Pagination page={page} totalPages={totalPages} />

@@ -6,9 +6,9 @@ import {
 
 import { getActiveTours } from "@/lib/queries/tours";
 
-import ScheduledTourForm from "./ScheduledTourForm";
-
 import { getTravelers } from "@/lib/queries/travelers";
+
+import ScheduledTourForm from "./ScheduledTourForm";
 
 export default async function NewScheduledTourPage() {
   const [tours, pickupLocations, affiliates, paymentTypes] = await Promise.all([
@@ -21,16 +21,16 @@ export default async function NewScheduledTourPage() {
   const travelers = await getTravelers();
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
+    <main className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Create Scheduled Tour</h1>
+        <h1 className="text-2xl font-semibold">Create Scheduled Tour</h1>
 
-          <p className="mt-1 text-sm text-gray-600">
-            Create a new scheduled tour and assign its booking information.
-          </p>
-        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Create a new scheduled tour and assign its booking information.
+        </p>
+      </div>
 
+      <div className="mx-auto max-w-5xl">
         <ScheduledTourForm
           tours={tours}
           pickupLocations={pickupLocations}

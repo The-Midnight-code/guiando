@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { getScheduledToursForAdmin } from "@/lib/queries/scheduledTours";
 import ScheduledToursTable from "./ScheduledToursTable";
 
@@ -55,12 +57,21 @@ export default async function ScheduledToursPage({
 
   return (
     <main className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-      <div>
-        <h1 className="text-2xl font-semibold">Scheduled Tours</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Scheduled Tours</h1>
 
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage scheduled tours and assignments.
-        </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage scheduled tours and assignments.
+          </p>
+        </div>
+
+        <Link
+          href="/admin/scheduled-tours/new"
+          className="w-full rounded-md bg-primary px-4 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-primary-hover sm:w-auto"
+        >
+          New Scheduled Tour
+        </Link>
       </div>
 
       <ScheduledToursTable

@@ -101,10 +101,20 @@ export default function GuideAssignment({
   return (
     <section className="rounded-xl border bg-card">
       <div className="border-b px-6 py-5">
-        <h2 className="font-semibold">Guides</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage the guides assigned to this scheduled tour.
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="font-semibold">Guides</h2>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              Manage the guides assigned to this scheduled tour.
+            </p>
+          </div>
+
+          <span className="shrink-0 rounded-full bg-card-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground">
+            {assignedGuides.length}{" "}
+            {assignedGuides.length === 1 ? "guide" : "guides"}
+          </span>
+        </div>
       </div>
 
       <div className="space-y-5 p-6">
@@ -120,13 +130,17 @@ export default function GuideAssignment({
             {assignedGuides.map((assignment) => (
               <div
                 key={assignment.id}
-                className="flex flex-col gap-3 rounded-md border p-4 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-4 rounded-lg bg-card-secondary p-4 sm:flex-row sm:items-center sm:justify-between"
               >
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm font-medium">
                     {assignment.guide
                       ? getGuideName(assignment.guide)
                       : "Unknown Guide"}
+                  </p>
+
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Assigned guide
                   </p>
                 </div>
 
@@ -182,9 +196,12 @@ export default function GuideAssignment({
         )}
 
         {error && (
-          <p className="text-sm text-error" role="alert">
+          <div
+            className="rounded-md bg-error px-4 py-3 text-sm text-error"
+            role="alert"
+          >
             {error}
-          </p>
+          </div>
         )}
       </div>
     </section>

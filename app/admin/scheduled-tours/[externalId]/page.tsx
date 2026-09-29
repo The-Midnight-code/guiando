@@ -46,19 +46,24 @@ export default async function ScheduledTourPage({
   return (
     <main className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       {/* Header */}
+      {/* Header */}
       <section className="rounded-xl border bg-card">
         <div className="flex flex-col gap-5 px-6 py-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                <p className="text-sm text-muted-foreground">
-                  Scheduled Tour #{scheduledTour.externalId}
-                </p>
+                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Scheduled Tour
+                </span>
+
+                <span className="text-xs text-muted-foreground">
+                  #{scheduledTour.externalId}
+                </span>
 
                 <StatusBadge status={scheduledTour.status} />
               </div>
 
-              <h1 className="mt-2 text-2xl font-semibold">
+              <h1 className="mt-2 text-2xl font-semibold tracking-tight">
                 {tour?.name ?? "Scheduled Tour"}
               </h1>
 
@@ -67,7 +72,7 @@ export default async function ScheduledTourPage({
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:shrink-0">
               <BackButton />
               <EditButton externalId={id} />
               <DeleteButton externalId={id} />
@@ -76,6 +81,7 @@ export default async function ScheduledTourPage({
         </div>
       </section>
 
+      {/* Tour Information */}
       {/* Tour Information */}
       <section className="rounded-xl border bg-card">
         <div className="border-b px-6 py-5">
@@ -86,7 +92,7 @@ export default async function ScheduledTourPage({
           </p>
         </div>
 
-        <div className="grid gap-5 p-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Product ID
@@ -150,6 +156,7 @@ export default async function ScheduledTourPage({
       </section>
 
       {/* Schedule */}
+      {/* Schedule */}
       <section className="rounded-xl border bg-card">
         <div className="border-b px-6 py-5">
           <h2 className="font-semibold">Schedule</h2>
@@ -159,7 +166,7 @@ export default async function ScheduledTourPage({
           </p>
         </div>
 
-        <div className="grid gap-5 p-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Booking Date
@@ -201,6 +208,7 @@ export default async function ScheduledTourPage({
       </section>
 
       {/* Pickup Information */}
+      {/* Pickup Information */}
       <section className="rounded-xl border bg-card">
         <div className="border-b px-6 py-5">
           <h2 className="font-semibold">Pickup Information</h2>
@@ -210,7 +218,7 @@ export default async function ScheduledTourPage({
           </p>
         </div>
 
-        <div className="grid gap-5 p-6 sm:grid-cols-2">
+        <div className="grid gap-6 p-6 sm:grid-cols-2">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Location
@@ -237,7 +245,7 @@ export default async function ScheduledTourPage({
                 Instructions
               </p>
 
-              <p className="mt-1 text-sm">
+              <p className="mt-1 text-sm leading-6">
                 {scheduledTour.pickupLocation.instructions}
               </p>
             </div>
@@ -266,6 +274,7 @@ export default async function ScheduledTourPage({
       </section>
 
       {/* Booking Information */}
+      {/* Booking Information */}
       <section className="rounded-xl border bg-card">
         <div className="border-b px-6 py-5">
           <h2 className="font-semibold">Booking Information</h2>
@@ -275,7 +284,7 @@ export default async function ScheduledTourPage({
           </p>
         </div>
 
-        <div className="grid gap-5 p-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Affiliate
@@ -323,26 +332,38 @@ export default async function ScheduledTourPage({
               Special Indications
             </p>
 
-            <p className="mt-1 text-sm">{scheduledTour.specialIndications}</p>
+            <p className="mt-1 text-sm leading-6">
+              {scheduledTour.specialIndications}
+            </p>
           </div>
         )}
       </section>
 
       {/* Guides and Travelers */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <GuideAssignment
-          externalId={id}
-          guides={guides}
-          assignedGuides={assignedGuides}
-        />
+      {/* Guides and Travelers */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="font-semibold">Guides and Travelers</h2>
 
-        <TravelersSection
-          externalId={id}
-          travelers={travelers}
-          assignedTravelers={scheduledTour.travelerAssignments}
-        />
-      </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage the guide assignment and travelers for this scheduled tour.
+          </p>
+        </div>
 
+        <div className="grid gap-6 lg:grid-cols-2">
+          <GuideAssignment
+            externalId={id}
+            guides={guides}
+            assignedGuides={assignedGuides}
+          />
+
+          <TravelersSection
+            externalId={id}
+            travelers={travelers}
+            assignedTravelers={scheduledTour.travelerAssignments}
+          />
+        </div>
+      </section>
       {/* Financials */}
       <FinancialsForm
         externalId={id}
