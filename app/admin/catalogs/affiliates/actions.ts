@@ -1,31 +1,11 @@
 "use server";
-import { auth } from "@clerk/nextjs/server";
-
-import { db } from "@/db/db";
+import { requireAdmin } from "@/lib/auth/permissions";
 import {
   createAffiliate,
   updateAffiliate,
   toggleAffiliateActive,
   type CreateAffiliateInput,
 } from "@/lib/queries/affiliates";
-
-async function requireAdmin() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  const currentUser = await db.query.users.findFirst({
-    where: {
-      clerkId: userId,
-    },
-  });
-
-  if (!currentUser || currentUser.role !== "ADMIN") {
-    throw new Error("Forbidden");
-  }
-}
 
 export async function createAffiliateAction(input: CreateAffiliateInput) {
   await requireAdmin();

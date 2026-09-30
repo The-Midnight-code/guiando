@@ -1,32 +1,11 @@
 "use server";
-import { auth } from "@clerk/nextjs/server";
-
-import { db } from "@/db/db";
-
+import { requireAdmin } from "@/lib/auth/permissions";
 import {
   createTourClass,
   updateTourClass,
   toggleTourClassActive,
   type CreateTourClassInput,
 } from "@/lib/queries/tourClasses";
-
-async function requireAdmin() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  const currentUser = await db.query.users.findFirst({
-    where: {
-      clerkId: userId,
-    },
-  });
-
-  if (!currentUser || currentUser.role !== "ADMIN") {
-    throw new Error("Forbidden");
-  }
-}
 
 export async function createTourClassAction(input: CreateTourClassInput) {
   await requireAdmin();

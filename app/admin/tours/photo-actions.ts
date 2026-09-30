@@ -1,32 +1,11 @@
 "use server";
-import { auth } from "@clerk/nextjs/server";
-
-import { db } from "@/db/db";
-
+import { requireAdmin } from "@/lib/auth/permissions";
 import {
   createTourPhoto,
   updateTourPhoto,
   deleteTourPhoto,
   type CreateTourPhotoInput,
 } from "@/lib/queries/tourPhotos";
-
-async function requireAdmin() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  const currentUser = await db.query.users.findFirst({
-    where: {
-      clerkId: userId,
-    },
-  });
-
-  if (!currentUser || currentUser.role !== "ADMIN") {
-    throw new Error("Forbidden");
-  }
-}
 
 export async function createTourPhotoAction(input: CreateTourPhotoInput) {
   try {
