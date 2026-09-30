@@ -1,28 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
 import { UserButton } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
-import AdminNav from "@/components/admin/AdminNav";
 
-import { getUserByClerkId } from "@/lib/queries/users";
+import AdminNav from "@/components/admin/AdminNav";
+import { requireAdmin } from "@/lib/auth/permissions";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect("/sign-in");
-  }
-
-  const user = await getUserByClerkId(userId);
-
-  if (!user || user.role !== "ADMIN") {
-    redirect("/guide/dashboard");
-  }
+  await requireAdmin();
 
   return (
     <div className="min-h-screen">
