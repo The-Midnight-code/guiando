@@ -1,4 +1,7 @@
 "use server";
+import { auth } from "@clerk/nextjs/server";
+
+import { db } from "@/db/db";
 
 import {
   createPaymentType,
@@ -7,7 +10,26 @@ import {
   type CreatePaymentTypeInput,
 } from "@/lib/queries/paymentTypes";
 
+async function requireAdmin() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const currentUser = await db.query.users.findFirst({
+    where: {
+      clerkId: userId,
+    },
+  });
+
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    throw new Error("Forbidden");
+  }
+}
+
 export async function createPaymentTypeAction(input: CreatePaymentTypeInput) {
+  await requireAdmin();
   try {
     const paymentType = await createPaymentType(input);
 
@@ -29,6 +51,7 @@ export async function updatePaymentTypeAction(
   id: string,
   input: CreatePaymentTypeInput,
 ) {
+  await requireAdmin();
   try {
     const paymentType = await updatePaymentType(id, input);
 
@@ -57,6 +80,7 @@ export async function togglePaymentTypeActiveAction(
   id: string,
   active: boolean,
 ) {
+  await requireAdmin();
   try {
     const paymentType = await togglePaymentTypeActive(id, active);
 

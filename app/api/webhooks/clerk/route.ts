@@ -22,11 +22,7 @@ type ClerkUserEvent = {
 };
 
 export async function POST(request: Request) {
-  console.log("1. Webhook received");
-
   const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
-
-  console.log("2. Secret exists:", Boolean(webhookSecret));
 
   if (!webhookSecret) {
     return new Response("Missing CLERK_WEBHOOK_SECRET", {
@@ -36,19 +32,11 @@ export async function POST(request: Request) {
 
   const payload = await request.text();
 
-  console.log("3. Payload received:", payload);
-
   const headerList = await headers();
 
   const svixId = headerList.get("svix-id");
   const svixTimestamp = headerList.get("svix-timestamp");
   const svixSignature = headerList.get("svix-signature");
-
-  console.log("4. Svix headers:", {
-    svixId: Boolean(svixId),
-    svixTimestamp: Boolean(svixTimestamp),
-    svixSignature: Boolean(svixSignature),
-  });
 
   if (!svixId || !svixTimestamp || !svixSignature) {
     return new Response("Missing Svix headers", {
@@ -57,8 +45,6 @@ export async function POST(request: Request) {
   }
 
   const webhook = new Webhook(webhookSecret);
-
-  console.log("5. Webhook instance created");
 
   let event: ClerkUserEvent;
 
@@ -69,11 +55,7 @@ export async function POST(request: Request) {
       "svix-signature": svixSignature,
     });
 
-    console.log("6. Signature verified");
-
     event = JSON.parse(payload) as ClerkUserEvent;
-
-    console.log("7. Event parsed:", event.type);
   } catch (error) {
     console.error("Clerk webhook error:", error);
 
@@ -81,8 +63,6 @@ export async function POST(request: Request) {
       status: 400,
     });
   }
-
-  console.log("8. Continuing with event");
 
   if (event.type !== "user.created" && event.type !== "user.updated") {
     return new Response("Event ignored", {
@@ -143,8 +123,6 @@ export async function POST(request: Request) {
         target: guides.userId,
       });
   }
-
-  console.log("9. User synchronized:", data.id);
 
   return new Response("User synchronized", {
     status: 200,

@@ -1,4 +1,7 @@
 "use server";
+import { auth } from "@clerk/nextjs/server";
+
+import { db } from "@/db/db";
 
 import {
   createTour,
@@ -7,7 +10,26 @@ import {
   type CreateTourInput,
 } from "@/lib/queries/tours";
 
+async function requireAdmin() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const currentUser = await db.query.users.findFirst({
+    where: {
+      clerkId: userId,
+    },
+  });
+
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    throw new Error("Forbidden");
+  }
+}
+
 export async function createTourAction(input: CreateTourInput) {
+  await requireAdmin();
   try {
     const tour = await createTour(input);
 
@@ -26,6 +48,7 @@ export async function createTourAction(input: CreateTourInput) {
 }
 
 export async function updateTourAction(id: string, input: CreateTourInput) {
+  await requireAdmin();
   try {
     const tour = await updateTour(id, input);
 
@@ -51,6 +74,7 @@ export async function updateTourAction(id: string, input: CreateTourInput) {
 }
 
 export async function deleteTourAction(id: string) {
+  await requireAdmin();
   try {
     const tour = await deleteTour(id);
 

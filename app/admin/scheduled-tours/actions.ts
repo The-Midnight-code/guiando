@@ -1,5 +1,7 @@
 "use server";
+import { auth } from "@clerk/nextjs/server";
 
+import { db } from "@/db/db";
 import {
   createScheduledTour,
   updateScheduledTour,
@@ -7,9 +9,28 @@ import {
   type CreateScheduledTourInput,
 } from "@/lib/queries/scheduledTours";
 
+async function requireAdmin() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const currentUser = await db.query.users.findFirst({
+    where: {
+      clerkId: userId,
+    },
+  });
+
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    throw new Error("Forbidden");
+  }
+}
+
 export async function createScheduledTourAction(
   input: CreateScheduledTourInput,
 ) {
+  await requireAdmin();
   try {
     const scheduledTour = await createScheduledTour(input);
 
@@ -31,7 +52,7 @@ export async function updateScheduledTourAction(
   externalId: number,
   input: CreateScheduledTourInput,
 ) {
-  console.log("UPDATE INPUT:", input);
+  await requireAdmin();
   try {
     const scheduledTour = await updateScheduledTour(externalId, input);
 
@@ -58,6 +79,7 @@ export async function updateScheduledTourAction(
 
 export async function deleteScheduledTourAction(externalId: number) {
   try {
+    await requireAdmin();
     const deletedScheduledTour = await deleteScheduledTour(externalId);
 
     if (!deletedScheduledTour) {

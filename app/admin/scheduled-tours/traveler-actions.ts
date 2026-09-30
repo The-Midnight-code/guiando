@@ -1,4 +1,25 @@
 "use server";
+import { auth } from "@clerk/nextjs/server";
+
+import { db } from "@/db/db";
+
+async function requireAdmin() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const currentUser = await db.query.users.findFirst({
+    where: {
+      clerkId: userId,
+    },
+  });
+
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    throw new Error("Forbidden");
+  }
+}
 
 import {
   createTraveler,
@@ -16,6 +37,7 @@ export async function assignTravelerAction(
   externalId: number,
   travelerId: string,
 ) {
+  await requireAdmin();
   try {
     const assignment = await assignTravelerToScheduledTour(
       externalId,
@@ -42,6 +64,7 @@ export async function removeTravelerAction(
   externalId: number,
   travelerId: string,
 ) {
+  await requireAdmin();
   try {
     const assignment = await removeTravelerFromScheduledTour(
       externalId,
@@ -72,6 +95,7 @@ export async function removeTravelerAction(
 }
 
 export async function createTravelerAction(input: CreateTravelerInput) {
+  await requireAdmin();
   try {
     const traveler = await createTraveler(input);
 
@@ -93,6 +117,7 @@ export async function updateTravelerAction(
   id: string,
   input: CreateTravelerInput,
 ) {
+  await requireAdmin();
   try {
     const traveler = await updateTraveler(id, input);
 

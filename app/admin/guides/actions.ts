@@ -41,7 +41,7 @@ export async function updateGuideAction(
     throw new Error("Guide not found.");
   }
 
-  if (currentUser.id === guide.userId) {
+  if (currentUser.id === guide.userId && role !== currentUser.role) {
     throw new Error("You cannot change your own role.");
   }
 
