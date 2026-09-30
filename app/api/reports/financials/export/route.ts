@@ -1,30 +1,12 @@
-import { auth } from "@clerk/nextjs/server";
-
-import { db } from "@/db/db";
 import { NextResponse } from "next/server";
+
+import { requireAdmin } from "@/lib/auth/permissions";
 
 import { exportFinancialReport } from "@/lib/reports/FinancialReport";
 
-async function requireAdmin() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  const currentUser = await db.query.users.findFirst({
-    where: {
-      clerkId: userId,
-    },
-  });
-
-  if (!currentUser || currentUser.role !== "ADMIN") {
-    throw new Error("Forbidden");
-  }
-}
-
 export async function GET(request: Request) {
   await requireAdmin();
+
   const { searchParams } = new URL(request.url);
 
   const startDate = searchParams.get("startDate");

@@ -1,8 +1,8 @@
 "use server";
 
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
-
+import { requireAdmin } from "@/lib/auth/permissions";
 import { db } from "@/db/db";
 import { guides, users } from "@/db/schema";
 
@@ -12,21 +12,7 @@ export async function updateGuideAction(
   active: boolean,
   role: "ADMIN" | "GUIDE",
 ) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  const currentUser = await db.query.users.findFirst({
-    where: {
-      clerkId: userId,
-    },
-  });
-
-  if (!currentUser || currentUser.role !== "ADMIN") {
-    throw new Error("Forbidden");
-  }
+  const currentUser = await requireAdmin();
 
   const guide = await db.query.guides.findFirst({
     where: {

@@ -56,6 +56,12 @@ export async function POST(request: Request) {
     });
 
     event = JSON.parse(payload) as ClerkUserEvent;
+
+    if (!event.data?.id || !Array.isArray(event.data.email_addresses)) {
+      return new Response("Invalid webhook payload", {
+        status: 400,
+      });
+    }
   } catch (error) {
     console.error("Clerk webhook error:", error);
 
@@ -89,39 +95,47 @@ export async function POST(request: Request) {
     });
   }
 
-  const [syncedUser] = await db
-    .insert(users)
-    .values({
-      clerkId: data.id,
-      email,
-      firstName: data.first_name,
-      lastName: data.last_name,
-      role: data.public_metadata.role === "ADMIN" ? "ADMIN" : "GUIDE",
-    })
-    .onConflictDoUpdate({
-      target: users.clerkId,
-      set: {
+  try {
+    const [syncedUser] = await db
+      .insert(users)
+      .values({
+        clerkId: data.id,
         email,
         firstName: data.first_name,
         lastName: data.last_name,
-        updatedAt: new Date(),
-      },
-    })
-    .returning({
-      id: users.id,
-      role: users.role,
-    });
-
-  if (syncedUser.role === "GUIDE") {
-    await db
-      .insert(guides)
-      .values({
-        userId: syncedUser.id,
-        active: true,
+        role: data.public_metadata.role === "ADMIN" ? "ADMIN" : "GUIDE",
       })
-      .onConflictDoNothing({
-        target: guides.userId,
+      .onConflictDoUpdate({
+        target: users.clerkId,
+        set: {
+          email,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          updatedAt: new Date(),
+        },
+      })
+      .returning({
+        id: users.id,
+        role: users.role,
       });
+
+    if (syncedUser.role === "GUIDE") {
+      await db
+        .insert(guides)
+        .values({
+          userId: syncedUser.id,
+          active: true,
+        })
+        .onConflictDoNothing({
+          target: guides.userId,
+        });
+    }
+  } catch (error) {
+    console.error("Failed to synchronize Clerk user:", error);
+
+    return new Response("Failed to synchronize user", {
+      status: 500,
+    });
   }
 
   return new Response("User synchronized", {
