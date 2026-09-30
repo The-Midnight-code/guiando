@@ -12,6 +12,26 @@ import {
   removeTravelerFromScheduledTour,
 } from "@/lib/queries/scheduledTourTravelers";
 
+function getTravelerErrorMessage(error: unknown): string | null {
+  if (!(error instanceof Error)) {
+    return null;
+  }
+
+  const knownErrors = new Set([
+    "Scheduled tour not found.",
+    "Traveler not found.",
+    "Traveler ID must be a valid UUID.",
+    "First name is required.",
+    "First name is too long.",
+    "Last name is too long.",
+    "Email is too long.",
+    "Email must be valid.",
+    "Phone number is too long.",
+  ]);
+
+  return knownErrors.has(error.message) ? error.message : null;
+}
+
 export async function assignTravelerAction(
   externalId: number,
   travelerId: string,
@@ -32,7 +52,7 @@ export async function assignTravelerAction(
 
     return {
       success: false,
-      error: "Failed to assign traveler.",
+      error: getTravelerErrorMessage(error) ?? "Failed to assign traveler.",
     };
   }
 }
@@ -64,7 +84,7 @@ export async function removeTravelerAction(
 
     return {
       success: false,
-      error: "Failed to remove traveler.",
+      error: getTravelerErrorMessage(error) ?? "Failed to remove traveler.",
     };
   }
 }
@@ -83,7 +103,7 @@ export async function createTravelerAction(input: CreateTravelerInput) {
 
     return {
       success: false,
-      error: "Failed to create traveler.",
+      error: getTravelerErrorMessage(error) ?? "Failed to create traveler.",
     };
   }
 }
@@ -112,7 +132,7 @@ export async function updateTravelerAction(
 
     return {
       success: false,
-      error: "Failed to update traveler.",
+      error: getTravelerErrorMessage(error) ?? "Failed to update traveler.",
     };
   }
 }

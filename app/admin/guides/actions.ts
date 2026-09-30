@@ -83,11 +83,15 @@ export async function updateGuideAction(
     }
   });
 
-  const client = await clerkClient();
+  try {
+    const client = await clerkClient();
 
-  await client.users.updateUserMetadata(guide.user.clerkId, {
-    publicMetadata: {
-      role,
-    },
-  });
+    await client.users.updateUserMetadata(guide.user.clerkId, {
+      publicMetadata: {
+        role,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to synchronize Clerk role metadata:", error);
+  }
 }
