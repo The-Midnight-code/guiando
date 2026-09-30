@@ -6,6 +6,10 @@ import {
   deleteScheduledTour,
   type CreateScheduledTourInput,
 } from "@/lib/queries/scheduledTours";
+import {
+  getDatabaseErrorMessage,
+  getScheduledTourErrorMessage,
+} from "@/lib/errors/database";
 
 export async function createScheduledTourAction(
   input: CreateScheduledTourInput,
@@ -23,7 +27,8 @@ export async function createScheduledTourAction(
 
     return {
       success: false,
-      error: "Failed to create scheduled tour.",
+      error:
+        getDatabaseErrorMessage(error) ?? "Failed to create scheduled tour.",
     };
   }
 }
@@ -52,7 +57,8 @@ export async function updateScheduledTourAction(
 
     return {
       success: false,
-      error: "Failed to update scheduled tour.",
+      error:
+        getDatabaseErrorMessage(error) ?? "Failed to update scheduled tour.",
     };
   }
 }
@@ -79,7 +85,10 @@ export async function deleteScheduledTourAction(externalId: number) {
 
     return {
       success: false,
-      error: "Failed to delete scheduled tour.",
+      error:
+        getScheduledTourErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to delete scheduled tour.",
     };
   }
 }

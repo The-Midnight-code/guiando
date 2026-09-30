@@ -437,9 +437,28 @@ async function validateScheduledTourReferences(
   }
 }
 
+async function validateExternalIdIsAvailable(
+  externalId: number | undefined,
+): Promise<void> {
+  if (externalId === undefined) {
+    return;
+  }
+
+  const existingTour = await db.query.scheduledTours.findFirst({
+    where: {
+      externalId,
+    },
+  });
+
+  if (existingTour) {
+    throw new Error("A scheduled tour with this external ID already exists.");
+  }
+}
+
 export async function createScheduledTour(input: CreateScheduledTourInput) {
   validateScheduledTourInput(input);
   await validateScheduledTourReferences(input);
+  await validateExternalIdIsAvailable(input.externalId);
 
   const [scheduledTour] = await db
     .insert(scheduledTours)
@@ -497,9 +516,32 @@ export async function updateScheduledTour(
 }
 
 export async function deleteScheduledTour(externalId: number) {
+  if (!Number.isInteger(externalId) || externalId <= 0) {
+    throw new Error("External ID must be a positive integer.");
+  }
+
+  const scheduledTour = await db.query.scheduledTours.findFirst({
+    where: {
+      externalId,
+    },
+    with: {
+      financials: true,
+    },
+  });
+
+  if (!scheduledTour) {
+    return undefined;
+  }
+
+  if (scheduledTour.financials) {
+    throw new Error(
+      "Scheduled tours with financial records cannot be deleted.",
+    );
+  }
+
   const [deletedScheduledTour] = await db
     .delete(scheduledTours)
-    .where(eq(scheduledTours.externalId, externalId))
+    .where(eq(scheduledTours.id, scheduledTour.id))
     .returning();
 
   return deletedScheduledTour;
