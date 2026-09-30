@@ -94,12 +94,7 @@ export default function FinancialsForm({
         guideCostMxn: formData.guideCostMxn || undefined,
         transportationCostMxn: formData.transportationCostMxn || undefined,
         travelersCostMxn: formData.travelersCostMxn || undefined,
-        totalTravelersCostMxn: totalTravelersCostMxn.toFixed(2),
         extraExpensesMxn: formData.extraExpensesMxn || undefined,
-        totalCostMxn: totalCostMxn.toFixed(2),
-        totalCostUsd: totalCostUsd.toFixed(2),
-        totalRevenueUsd: totalRevenueUsd.toFixed(2),
-        revenuePercentage: revenuePercentage.toFixed(2),
       };
 
       const result = initialData

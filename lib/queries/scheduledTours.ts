@@ -298,7 +298,6 @@ export interface CreateScheduledTourInput {
   endTime?: string;
   locationStart?: string;
   locationEnd?: string;
-  numberOfPeople?: number;
   specialIndications?: string;
   tip?: string;
 }
@@ -319,7 +318,6 @@ export async function createScheduledTour(input: CreateScheduledTourInput) {
       endTime: input.endTime,
       locationStart: input.locationStart,
       locationEnd: input.locationEnd,
-      numberOfPeople: input.numberOfPeople,
       specialIndications: input.specialIndications,
       tip: input.tip,
     })
@@ -346,7 +344,6 @@ export async function updateScheduledTour(
       endTime: input.endTime,
       locationStart: input.locationStart,
       locationEnd: input.locationEnd,
-      numberOfPeople: input.numberOfPeople,
       specialIndications: input.specialIndications,
       tip: input.tip,
       updatedAt: new Date(),

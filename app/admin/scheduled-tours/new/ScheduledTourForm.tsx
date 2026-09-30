@@ -411,7 +411,6 @@ export default function ScheduledTourForm({
         endTime: formData.endTime || undefined,
         locationStart: formData.locationStart || undefined,
         locationEnd: formData.locationEnd || undefined,
-        numberOfPeople: selectedTravelers.length,
         specialIndications: formData.specialIndications || undefined,
         tip: formData.tip || undefined,
       };

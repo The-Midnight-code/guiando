@@ -1,5 +1,6 @@
 import { db } from "@/db/db";
-import { and, eq } from "drizzle-orm";
+
+import { and, count, eq } from "drizzle-orm";
 
 import { scheduledTourTravelers, scheduledTours } from "@/db/schema";
 
@@ -28,63 +29,105 @@ export async function assignTravelerToScheduledTour(
   externalId: number,
   travelerId: string,
 ) {
-  const scheduledTour = await db.query.scheduledTours.findFirst({
-    where: {
-      externalId,
-    },
+  return db.transaction(async (tx) => {
+    const [scheduledTour] = await tx
+      .select()
+      .from(scheduledTours)
+      .where(eq(scheduledTours.externalId, externalId))
+      .limit(1);
+
+    if (!scheduledTour) {
+      throw new Error("Scheduled tour not found.");
+    }
+
+    const [existingAssignment] = await tx
+      .select()
+      .from(scheduledTourTravelers)
+      .where(
+        and(
+          eq(scheduledTourTravelers.scheduledTourId, scheduledTour.id),
+          eq(scheduledTourTravelers.travelerId, travelerId),
+        ),
+      )
+      .limit(1);
+
+    if (existingAssignment) {
+      return existingAssignment;
+    }
+
+    const [assignment] = await tx
+      .insert(scheduledTourTravelers)
+      .values({
+        scheduledTourId: scheduledTour.id,
+        travelerId,
+      })
+      .returning();
+
+    const [assignmentCount] = await tx
+      .select({
+        count: count(),
+      })
+      .from(scheduledTourTravelers)
+      .where(eq(scheduledTourTravelers.scheduledTourId, scheduledTour.id));
+
+    await tx
+      .update(scheduledTours)
+      .set({
+        numberOfPeople: assignmentCount?.count ?? 0,
+        updatedAt: new Date(),
+      })
+      .where(eq(scheduledTours.id, scheduledTour.id));
+
+    return assignment;
   });
-
-  if (!scheduledTour) {
-    throw new Error("Scheduled tour not found.");
-  }
-
-  const existingAssignment = await db.query.scheduledTourTravelers.findFirst({
-    where: {
-      scheduledTourId: scheduledTour.id,
-      travelerId,
-    },
-  });
-
-  if (existingAssignment) {
-    return existingAssignment;
-  }
-
-  const [assignment] = await db
-    .insert(scheduledTourTravelers)
-    .values({
-      scheduledTourId: scheduledTour.id,
-      travelerId,
-    })
-    .returning();
-
-  return assignment;
 }
 
 export async function removeTravelerFromScheduledTour(
   externalId: number,
   travelerId: string,
 ) {
-  const scheduledTour = await db.query.scheduledTours.findFirst({
-    where: {
-      externalId,
-    },
+  return db.transaction(async (tx) => {
+    const [scheduledTour] = await tx
+      .select()
+      .from(scheduledTours)
+      .where(eq(scheduledTours.externalId, externalId))
+      .limit(1);
+
+    if (!scheduledTour) {
+      throw new Error("Scheduled tour not found.");
+    }
+
+    const [deletedAssignment] = await tx
+      .delete(scheduledTourTravelers)
+      .where(
+        and(
+          eq(scheduledTourTravelers.scheduledTourId, scheduledTour.id),
+          eq(scheduledTourTravelers.travelerId, travelerId),
+        ),
+      )
+      .returning();
+
+    if (!deletedAssignment) {
+      return undefined;
+    }
+
+    const [assignmentCount] = await tx
+      .select({
+        count: count(),
+      })
+      .from(scheduledTourTravelers)
+      .where(eq(scheduledTourTravelers.scheduledTourId, scheduledTour.id));
+
+    await tx
+      .update(scheduledTours)
+      .set({
+        numberOfPeople: assignmentCount?.count ?? 0,
+        updatedAt: new Date(),
+      })
+      .where(eq(scheduledTours.id, scheduledTour.id));
+
+    return deletedAssignment;
   });
-
-  if (!scheduledTour) {
-    throw new Error("Scheduled tour not found.");
-  }
-
-  const [deletedAssignment] = await db
-    .delete(scheduledTourTravelers)
-    .where(
-      and(
-        eq(scheduledTourTravelers.scheduledTourId, scheduledTour.id),
-        eq(scheduledTourTravelers.travelerId, travelerId),
-      ),
-    )
-    .returning();
-
-  return deletedAssignment;
 }
 
 export async function syncNumberOfPeople(externalId: number) {
@@ -98,16 +141,17 @@ export async function syncNumberOfPeople(externalId: number) {
     throw new Error("Scheduled tour not found.");
   }
 
-  const assignments = await db.query.scheduledTourTravelers.findMany({
-    where: {
-      scheduledTourId: scheduledTour.id,
-    },
-  });
+  const [assignmentCount] = await db
+    .select({
+      count: count(),
+    })
+    .from(scheduledTourTravelers)
+    .where(eq(scheduledTourTravelers.scheduledTourId, scheduledTour.id));
 
   const [updatedScheduledTour] = await db
     .update(scheduledTours)
     .set({
-      numberOfPeople: assignments.length,
+      numberOfPeople: assignmentCount?.count ?? 0,
       updatedAt: new Date(),
     })
     .where(eq(scheduledTours.id, scheduledTour.id))
