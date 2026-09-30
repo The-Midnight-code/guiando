@@ -1,18 +1,9 @@
 import { db } from "@/db/db";
+import { and, asc, count, desc, eq, exists, ilike, or, sql } from "drizzle-orm";
 import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  exists,
-  ilike,
-  inArray,
-  or,
-  sql,
-} from "drizzle-orm";
-import {
+  affiliates,
   guides,
+  paymentTypes,
   pickupLocations,
   scheduledTourGuides,
   scheduledTours,
@@ -137,15 +128,6 @@ export async function getScheduledToursForAdmin({
   const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
 
   const offset = (page - 1) * pageSize;
-
-  const orderColumn =
-    sortBy === "date"
-      ? scheduledTours.tourDate
-      : sortBy === "startTime"
-        ? scheduledTours.startTime
-        : sortBy === "status"
-          ? scheduledTours.status
-          : scheduledTours.tourDate;
 
   const orderDirection = sortDirection === "desc" ? desc : asc;
 
@@ -302,7 +284,163 @@ export interface CreateScheduledTourInput {
   tip?: string;
 }
 
+function isValidUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
+
+function validateUuid(value: string, fieldName: string): void {
+  if (!isValidUuid(value)) {
+    throw new Error(`${fieldName} must be a valid UUID.`);
+  }
+}
+
+function validateDate(
+  value: string | undefined,
+  fieldName: string,
+  required = false,
+): void {
+  if (!value) {
+    if (required) {
+      throw new Error(`${fieldName} is required.`);
+    }
+
+    return;
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error(`${fieldName} must be a valid date.`);
+  }
+
+  const date = new Date(`${value}T00:00:00Z`);
+
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.toISOString().slice(0, 10) !== value
+  ) {
+    throw new Error(`${fieldName} must be a valid date.`);
+  }
+}
+
+function validateTime(value: string | undefined, fieldName: string): void {
+  if (!value) {
+    return;
+  }
+
+  if (!/^\d{2}:\d{2}$/.test(value)) {
+    throw new Error(`${fieldName} must be a valid time.`);
+  }
+
+  const [hours, minutes] = value.split(":").map(Number);
+
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+    throw new Error(`${fieldName} must be a valid time.`);
+  }
+}
+
+function validateExternalId(value: number | undefined, required = false): void {
+  if (value === undefined) {
+    if (required) {
+      throw new Error("External ID is required.");
+    }
+
+    return;
+  }
+
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error("External ID must be a positive integer.");
+  }
+}
+
+function validateTip(value: string | undefined): void {
+  if (!value || value.trim() === "") {
+    return;
+  }
+
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw new Error("Tip must be a valid non-negative number.");
+  }
+}
+
+function validateScheduledTourInput(input: CreateScheduledTourInput): void {
+  validateUuid(input.tourId, "Tour ID");
+  validateUuid(input.pickupLocationId, "Pickup location ID");
+
+  if (input.affiliateId) {
+    validateUuid(input.affiliateId, "Affiliate ID");
+  }
+
+  if (input.paymentTypeId) {
+    validateUuid(input.paymentTypeId, "Payment type ID");
+  }
+
+  if (!input.status.trim()) {
+    throw new Error("Status is required.");
+  }
+
+  validateExternalId(input.externalId);
+  validateDate(input.bookingDate, "Booking date");
+  validateDate(input.tourDate, "Tour date", true);
+
+  validateTime(input.startTime, "Start time");
+  validateTime(input.endTime, "End time");
+
+  if (input.startTime && input.endTime && input.endTime < input.startTime) {
+    throw new Error("End time cannot be earlier than start time.");
+  }
+
+  validateTip(input.tip);
+}
+
+async function validateScheduledTourReferences(
+  input: CreateScheduledTourInput,
+): Promise<void> {
+  const [tour, pickupLocation, affiliate, paymentType] = await Promise.all([
+    db.query.tours.findFirst({
+      where: { id: input.tourId },
+    }),
+
+    db.query.pickupLocations.findFirst({
+      where: { id: input.pickupLocationId },
+    }),
+
+    input.affiliateId
+      ? db.query.affiliates.findFirst({
+          where: { id: input.affiliateId },
+        })
+      : Promise.resolve(null),
+
+    input.paymentTypeId
+      ? db.query.paymentTypes.findFirst({
+          where: { id: input.paymentTypeId },
+        })
+      : Promise.resolve(null),
+  ]);
+
+  if (!tour) {
+    throw new Error("Tour not found.");
+  }
+
+  if (!pickupLocation) {
+    throw new Error("Pickup location not found.");
+  }
+
+  if (input.affiliateId && !affiliate) {
+    throw new Error("Affiliate not found.");
+  }
+
+  if (input.paymentTypeId && !paymentType) {
+    throw new Error("Payment type not found.");
+  }
+}
+
 export async function createScheduledTour(input: CreateScheduledTourInput) {
+  validateScheduledTourInput(input);
+  await validateScheduledTourReferences(input);
+
   const [scheduledTour] = await db
     .insert(scheduledTours)
     .values({
@@ -330,6 +468,10 @@ export async function updateScheduledTour(
   externalId: number,
   input: CreateScheduledTourInput,
 ) {
+  validateExternalId(externalId, true);
+  validateScheduledTourInput(input);
+  await validateScheduledTourReferences(input);
+
   const [scheduledTour] = await db
     .update(scheduledTours)
     .set({

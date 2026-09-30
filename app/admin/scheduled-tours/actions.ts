@@ -58,8 +58,9 @@ export async function updateScheduledTourAction(
 }
 
 export async function deleteScheduledTourAction(externalId: number) {
+  await requireAdmin();
+
   try {
-    await requireAdmin();
     const deletedScheduledTour = await deleteScheduledTour(externalId);
 
     if (!deletedScheduledTour) {
