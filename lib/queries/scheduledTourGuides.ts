@@ -1,9 +1,14 @@
 import { db } from "@/db/db";
+
 import { and, eq } from "drizzle-orm";
 
-import { scheduledTourGuides, scheduledTours } from "@/db/schema";
+import { guides, scheduledTourGuides, scheduledTours } from "@/db/schema";
 
 export async function getGuidesForScheduledTour(externalId: number) {
+  if (!Number.isInteger(externalId) || externalId <= 0) {
+    throw new Error("External ID must be a positive integer.");
+  }
+
   const scheduledTour = await db.query.scheduledTours.findFirst({
     where: {
       externalId,
@@ -32,47 +37,75 @@ export async function assignGuideToScheduledTour(
   externalId: number,
   guideId: string,
 ) {
-  const scheduledTour = await db.query.scheduledTours.findFirst({
-    where: {
-      externalId,
-    },
-  });
-
-  if (!scheduledTour) {
-    throw new Error("Scheduled tour not found.");
+  if (!Number.isInteger(externalId) || externalId <= 0) {
+    throw new Error("External ID must be a positive integer.");
   }
 
-  const existingAssignment = await db.query.scheduledTourGuides.findFirst({
-    where: {
-      scheduledTourId: scheduledTour.id,
-      guideId,
-    },
+  return db.transaction(async (tx) => {
+    const [scheduledTour] = await tx
+      .select()
+      .from(scheduledTours)
+      .where(eq(scheduledTours.externalId, externalId))
+      .limit(1);
+
+    if (!scheduledTour) {
+      throw new Error("Scheduled tour not found.");
+    }
+
+    const [guide] = await tx
+      .select()
+      .from(guides)
+      .where(eq(guides.id, guideId))
+      .limit(1);
+
+    if (!guide) {
+      throw new Error("Guide not found.");
+    }
+
+    if (!guide.active) {
+      throw new Error("Guide is inactive.");
+    }
+
+    const [existingAssignment] = await tx
+      .select()
+      .from(scheduledTourGuides)
+      .where(
+        and(
+          eq(scheduledTourGuides.scheduledTourId, scheduledTour.id),
+          eq(scheduledTourGuides.guideId, guideId),
+        ),
+      )
+      .limit(1);
+
+    if (existingAssignment) {
+      return existingAssignment;
+    }
+
+    const [assignment] = await tx
+      .insert(scheduledTourGuides)
+      .values({
+        scheduledTourId: scheduledTour.id,
+        guideId,
+      })
+      .returning();
+
+    return assignment;
   });
-
-  if (existingAssignment) {
-    return existingAssignment;
-  }
-
-  const [assignment] = await db
-    .insert(scheduledTourGuides)
-    .values({
-      scheduledTourId: scheduledTour.id,
-      guideId,
-    })
-    .returning();
-
-  return assignment;
 }
 
 export async function removeGuideFromScheduledTour(
   externalId: number,
   guideId: string,
 ) {
-  const scheduledTour = await db.query.scheduledTours.findFirst({
-    where: {
-      externalId,
-    },
-  });
+  if (!Number.isInteger(externalId) || externalId <= 0) {
+    throw new Error("External ID must be a positive integer.");
+  }
+
+  const [scheduledTour] = await db
+    .select()
+    .from(scheduledTours)
+    .where(eq(scheduledTours.externalId, externalId))
+    .limit(1);
 
   if (!scheduledTour) {
     throw new Error("Scheduled tour not found.");

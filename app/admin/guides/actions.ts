@@ -1,14 +1,17 @@
 "use server";
 
 import { clerkClient } from "@clerk/nextjs/server";
-
 import { eq } from "drizzle-orm";
 
 import { requireAdmin } from "@/lib/auth/permissions";
-
 import { db } from "@/db/db";
-
 import { guides, users } from "@/db/schema";
+
+function isValidUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
 
 export async function updateGuideAction(
   guideId: string,
@@ -17,6 +20,16 @@ export async function updateGuideAction(
   role: "ADMIN" | "GUIDE",
 ) {
   const currentUser = await requireAdmin();
+
+  if (!isValidUuid(guideId)) {
+    throw new Error("Guide ID must be a valid UUID.");
+  }
+
+  const normalizedPhone = phone.trim();
+
+  if (normalizedPhone.length > 30) {
+    throw new Error("Phone number is too long.");
+  }
 
   const guide = await db.query.guides.findFirst({
     where: {
@@ -43,7 +56,7 @@ export async function updateGuideAction(
     await tx
       .update(guides)
       .set({
-        phone: phone.trim() || null,
+        phone: normalizedPhone || null,
         active,
         updatedAt: new Date(),
       })
