@@ -1,5 +1,8 @@
 "use server";
+
 import { requireAdmin } from "@/lib/auth/permissions";
+import { getDatabaseErrorMessage } from "@/lib/errors/database";
+
 import {
   createTourClass,
   updateTourClass,
@@ -7,8 +10,20 @@ import {
   type CreateTourClassInput,
 } from "@/lib/queries/tourClasses";
 
+function getTourClassErrorMessage(error: unknown): string | null {
+  if (!(error instanceof Error)) return null;
+
+  const knownErrors = new Set([
+    "Tour class ID must be a valid UUID.",
+    "Tour class name is required.",
+  ]);
+
+  return knownErrors.has(error.message) ? error.message : null;
+}
+
 export async function createTourClassAction(input: CreateTourClassInput) {
   await requireAdmin();
+
   try {
     const tourClass = await createTourClass(input);
 
@@ -21,7 +36,10 @@ export async function createTourClassAction(input: CreateTourClassInput) {
 
     return {
       success: false,
-      error: "Failed to create tour class.",
+      error:
+        getTourClassErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to create tour class.",
     };
   }
 }
@@ -31,6 +49,7 @@ export async function updateTourClassAction(
   input: CreateTourClassInput,
 ) {
   await requireAdmin();
+
   try {
     const tourClass = await updateTourClass(id, input);
 
@@ -50,13 +69,17 @@ export async function updateTourClassAction(
 
     return {
       success: false,
-      error: "Failed to update tour class.",
+      error:
+        getTourClassErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to update tour class.",
     };
   }
 }
 
 export async function toggleTourClassActiveAction(id: string, active: boolean) {
   await requireAdmin();
+
   try {
     const tourClass = await toggleTourClassActive(id, active);
 
@@ -76,7 +99,10 @@ export async function toggleTourClassActiveAction(id: string, active: boolean) {
 
     return {
       success: false,
-      error: "Failed to update tour class status.",
+      error:
+        getTourClassErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to update tour class status.",
     };
   }
 }
