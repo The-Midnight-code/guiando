@@ -1,7 +1,30 @@
 import { db } from "@/db/db";
+
 import { eq } from "drizzle-orm";
 
 import { pickupLocations } from "@/db/schema";
+
+function isValidUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
+
+function validateUuid(value: string, fieldName: string): void {
+  if (!isValidUuid(value)) {
+    throw new Error(`${fieldName} must be a valid UUID.`);
+  }
+}
+
+function validatePickupLocationInput(input: CreatePickupLocationInput): void {
+  if (!input.name.trim()) {
+    throw new Error("Pickup location name is required.");
+  }
+
+  if (!input.address.trim()) {
+    throw new Error("Pickup location address is required.");
+  }
+}
 
 export async function getPickupLocations() {
   return db.query.pickupLocations.findMany({
@@ -23,6 +46,8 @@ export async function getActivePickupLocations() {
 }
 
 export async function getPickupLocationById(id: string) {
+  validateUuid(id, "Pickup location ID");
+
   return db.query.pickupLocations.findFirst({
     where: {
       id,
@@ -40,14 +65,16 @@ export interface CreatePickupLocationInput {
 }
 
 export async function createPickupLocation(input: CreatePickupLocationInput) {
+  validatePickupLocationInput(input);
+
   const [pickupLocation] = await db
     .insert(pickupLocations)
     .values({
-      name: input.name,
-      address: input.address,
-      instructions: input.instructions,
-      latitude: input.latitude,
-      longitude: input.longitude,
+      name: input.name.trim(),
+      address: input.address.trim(),
+      instructions: input.instructions?.trim() || undefined,
+      latitude: input.latitude?.trim() || undefined,
+      longitude: input.longitude?.trim() || undefined,
       active: input.active ?? true,
     })
     .returning();
@@ -59,14 +86,17 @@ export async function updatePickupLocation(
   id: string,
   input: CreatePickupLocationInput,
 ) {
+  validateUuid(id, "Pickup location ID");
+  validatePickupLocationInput(input);
+
   const [pickupLocation] = await db
     .update(pickupLocations)
     .set({
-      name: input.name,
-      address: input.address,
-      instructions: input.instructions,
-      latitude: input.latitude,
-      longitude: input.longitude,
+      name: input.name.trim(),
+      address: input.address.trim(),
+      instructions: input.instructions?.trim() || undefined,
+      latitude: input.latitude?.trim() || undefined,
+      longitude: input.longitude?.trim() || undefined,
       active: input.active ?? true,
       updatedAt: new Date(),
     })
@@ -77,6 +107,8 @@ export async function updatePickupLocation(
 }
 
 export async function togglePickupLocationActive(id: string, active: boolean) {
+  validateUuid(id, "Pickup location ID");
+
   const [pickupLocation] = await db
     .update(pickupLocations)
     .set({

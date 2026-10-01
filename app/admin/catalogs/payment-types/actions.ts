@@ -1,5 +1,7 @@
 "use server";
+
 import { requireAdmin } from "@/lib/auth/permissions";
+import { getDatabaseErrorMessage } from "@/lib/errors/database";
 
 import {
   createPaymentType,
@@ -8,8 +10,20 @@ import {
   type CreatePaymentTypeInput,
 } from "@/lib/queries/paymentTypes";
 
+function getPaymentTypeErrorMessage(error: unknown): string | null {
+  if (!(error instanceof Error)) return null;
+
+  const knownErrors = new Set([
+    "Payment type ID must be a valid UUID.",
+    "Payment type name is required.",
+  ]);
+
+  return knownErrors.has(error.message) ? error.message : null;
+}
+
 export async function createPaymentTypeAction(input: CreatePaymentTypeInput) {
   await requireAdmin();
+
   try {
     const paymentType = await createPaymentType(input);
 
@@ -22,7 +36,10 @@ export async function createPaymentTypeAction(input: CreatePaymentTypeInput) {
 
     return {
       success: false,
-      error: "Failed to create payment type.",
+      error:
+        getPaymentTypeErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to create payment type.",
     };
   }
 }
@@ -32,6 +49,7 @@ export async function updatePaymentTypeAction(
   input: CreatePaymentTypeInput,
 ) {
   await requireAdmin();
+
   try {
     const paymentType = await updatePaymentType(id, input);
 
@@ -51,7 +69,10 @@ export async function updatePaymentTypeAction(
 
     return {
       success: false,
-      error: "Failed to update payment type.",
+      error:
+        getPaymentTypeErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to update payment type.",
     };
   }
 }
@@ -61,6 +82,7 @@ export async function togglePaymentTypeActiveAction(
   active: boolean,
 ) {
   await requireAdmin();
+
   try {
     const paymentType = await togglePaymentTypeActive(id, active);
 
@@ -80,7 +102,10 @@ export async function togglePaymentTypeActiveAction(
 
     return {
       success: false,
-      error: "Failed to update payment type status.",
+      error:
+        getPaymentTypeErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to update payment type status.",
     };
   }
 }

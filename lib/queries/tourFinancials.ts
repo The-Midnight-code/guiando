@@ -26,6 +26,12 @@ interface FinancialValues {
   exchangeRate: number;
 }
 
+function validateExternalId(externalId: number): void {
+  if (!Number.isInteger(externalId) || externalId <= 0) {
+    throw new Error("Scheduled tour ID must be a positive integer.");
+  }
+}
+
 function parseNonNegativeNumber(
   value: string | undefined,
   fieldName: string,
@@ -97,9 +103,7 @@ function calculateFinancialValues(
 }
 
 async function getScheduledTourFinancialContext(externalId: number) {
-  if (!Number.isInteger(externalId)) {
-    throw new Error("Invalid scheduled tour ID.");
-  }
+  validateExternalId(externalId);
 
   const [scheduledTour, travelerCount] = await Promise.all([
     db.query.scheduledTours.findFirst({
@@ -161,6 +165,8 @@ function validateFinancialInput(
 }
 
 export async function getFinancialsForScheduledTour(externalId: number) {
+  validateExternalId(externalId);
+
   const scheduledTour = await db.query.scheduledTours.findFirst({
     where: {
       externalId,

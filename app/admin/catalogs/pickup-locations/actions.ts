@@ -1,5 +1,7 @@
 "use server";
+
 import { requireAdmin } from "@/lib/auth/permissions";
+import { getDatabaseErrorMessage } from "@/lib/errors/database";
 
 import {
   createPickupLocation,
@@ -8,10 +10,23 @@ import {
   type CreatePickupLocationInput,
 } from "@/lib/queries/pickupLocations";
 
+function getPickupLocationErrorMessage(error: unknown): string | null {
+  if (!(error instanceof Error)) return null;
+
+  const knownErrors = new Set([
+    "Pickup location ID must be a valid UUID.",
+    "Pickup location name is required.",
+    "Pickup location address is required.",
+  ]);
+
+  return knownErrors.has(error.message) ? error.message : null;
+}
+
 export async function createPickupLocationAction(
   input: CreatePickupLocationInput,
 ) {
   await requireAdmin();
+
   try {
     const pickupLocation = await createPickupLocation(input);
 
@@ -24,7 +39,10 @@ export async function createPickupLocationAction(
 
     return {
       success: false,
-      error: "Failed to create pickup location.",
+      error:
+        getPickupLocationErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to create pickup location.",
     };
   }
 }
@@ -34,6 +52,7 @@ export async function updatePickupLocationAction(
   input: CreatePickupLocationInput,
 ) {
   await requireAdmin();
+
   try {
     const pickupLocation = await updatePickupLocation(id, input);
 
@@ -53,7 +72,10 @@ export async function updatePickupLocationAction(
 
     return {
       success: false,
-      error: "Failed to update pickup location.",
+      error:
+        getPickupLocationErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to update pickup location.",
     };
   }
 }
@@ -63,6 +85,7 @@ export async function togglePickupLocationActiveAction(
   active: boolean,
 ) {
   await requireAdmin();
+
   try {
     const pickupLocation = await togglePickupLocationActive(id, active);
 
@@ -82,7 +105,10 @@ export async function togglePickupLocationActiveAction(
 
     return {
       success: false,
-      error: "Failed to update pickup location status.",
+      error:
+        getPickupLocationErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to update pickup location status.",
     };
   }
 }
