@@ -559,6 +559,8 @@ export async function getScheduledTourStatuses() {
 }
 
 export async function getScheduledTourByUuid(id: string, userId: string) {
+  validateUuid(id, "Scheduled tour ID");
+  validateUuid(userId, "User ID");
   return db.query.scheduledTours.findFirst({
     where: {
       id,
@@ -589,20 +591,8 @@ export async function getScheduledTourByUuid(id: string, userId: string) {
 }
 
 export async function completeScheduledTour(id: string, userId: string) {
-  const assignedTour = await db.query.scheduledTours.findFirst({
-    where: {
-      id,
-      guideAssignments: {
-        guide: {
-          userId,
-        },
-      },
-    },
-  });
-
-  if (!assignedTour) {
-    return null;
-  }
+  validateUuid(id, "Scheduled tour ID");
+  validateUuid(userId, "User ID");
 
   const [updatedTour] = await db
     .update(scheduledTours)
@@ -610,8 +600,28 @@ export async function completeScheduledTour(id: string, userId: string) {
       status: "COMPLETED",
       updatedAt: new Date(),
     })
-    .where(eq(scheduledTours.id, id))
+    .where(
+      and(
+        eq(scheduledTours.id, id),
+        or(
+          eq(scheduledTours.status, "PENDING"),
+          eq(scheduledTours.status, "CONFIRMED"),
+        ),
+        exists(
+          db
+            .select({ id: scheduledTourGuides.id })
+            .from(scheduledTourGuides)
+            .innerJoin(guides, eq(guides.id, scheduledTourGuides.guideId))
+            .where(
+              and(
+                eq(scheduledTourGuides.scheduledTourId, scheduledTours.id),
+                eq(guides.userId, userId),
+              ),
+            ),
+        ),
+      ),
+    )
     .returning();
 
-  return updatedTour;
+  return updatedTour ?? null;
 }

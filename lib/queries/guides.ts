@@ -11,6 +11,24 @@ import {
 
 import { clerkClient } from "@clerk/nextjs/server";
 
+function validateUuid(value: string, fieldName: string): void {
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value,
+    )
+  ) {
+    throw new Error(`${fieldName} must be a valid UUID.`);
+  }
+}
+
+function validateLimit(limit: number): number {
+  if (!Number.isInteger(limit) || limit < 1) {
+    throw new Error("Limit must be a positive integer.");
+  }
+
+  return Math.min(limit, 50);
+}
+
 export async function getActiveGuides() {
   return db.query.guides.findMany({
     where: {
@@ -23,7 +41,9 @@ export async function getActiveGuides() {
 }
 
 export async function getGuideUpcomingTours(userId: string, limit = 5) {
+  validateUuid(userId, "User ID");
   const today = new Date().toISOString().split("T")[0];
+  const safeLimit = validateLimit(limit);
 
   return db
     .select({
@@ -59,7 +79,7 @@ export async function getGuideUpcomingTours(userId: string, limit = 5) {
       ),
     )
     .orderBy(asc(scheduledTours.tourDate), asc(scheduledTours.startTime))
-    .limit(limit);
+    .limit(safeLimit);
 }
 
 export async function getGuideScheduledTours(
@@ -67,6 +87,7 @@ export async function getGuideScheduledTours(
   status?: string,
   search?: string,
 ) {
+  validateUuid(userId, "User ID");
   const normalizedSearch = search?.trim();
 
   const conditions: SQL[] = [eq(guides.userId, userId)];
@@ -115,6 +136,7 @@ export async function getGuideScheduledTours(
 }
 
 export async function getGuideDashboardStats(userId: string) {
+  validateUuid(userId, "User ID");
   const today = new Date().toISOString().split("T")[0];
 
   const [upcomingResult, todayResult, confirmedResult] = await Promise.all([

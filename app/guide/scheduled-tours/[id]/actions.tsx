@@ -1,23 +1,12 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
-import { getUserByClerkId } from "@/lib/queries/users";
+import { requireGuide } from "@/lib/auth/permissions";
 import { completeScheduledTour } from "@/lib/queries/scheduledTours";
 
 export async function completeScheduledTourAction(id: string) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  const user = await getUserByClerkId(userId);
-
-  if (!user || user.role !== "GUIDE") {
-    throw new Error("Unauthorized");
-  }
+  const user = await requireGuide();
 
   const updatedTour = await completeScheduledTour(id, user.id);
 
