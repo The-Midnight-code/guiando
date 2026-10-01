@@ -2,6 +2,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import Link from "next/link";
 
 import { getScheduledToursForAdmin } from "@/lib/queries/scheduledTours";
+
 import ScheduledToursTable from "./ScheduledToursTable";
 
 interface ScheduledToursPageProps {
@@ -55,7 +56,8 @@ export default async function ScheduledToursPage({
     page,
     pageSize,
   });
-  const client = await clerkClient();
+
+  const guideImageMap = new Map<string, string>();
 
   const clerkIds = result.items
     .flatMap((scheduledTour) =>
@@ -67,13 +69,17 @@ export default async function ScheduledToursPage({
 
   const uniqueClerkIds = [...new Set(clerkIds)];
 
-  const { data: clerkUsers } = await client.users.getUserList({
-    userId: uniqueClerkIds,
-  });
+  if (uniqueClerkIds.length > 0) {
+    const client = await clerkClient();
 
-  const guideImageMap = new Map(
-    clerkUsers.map((user) => [user.id, user.imageUrl]),
-  );
+    const { data: clerkUsers } = await client.users.getUserList({
+      userId: uniqueClerkIds,
+    });
+
+    for (const user of clerkUsers) {
+      guideImageMap.set(user.id, user.imageUrl);
+    }
+  }
 
   const scheduledToursWithImages = result.items.map((scheduledTour) => ({
     ...scheduledTour,

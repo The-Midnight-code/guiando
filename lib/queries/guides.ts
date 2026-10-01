@@ -86,8 +86,19 @@ export async function getGuideScheduledTours(
   userId: string,
   status?: string,
   search?: string,
+  page = 1,
+  pageSize = 20,
 ) {
   validateUuid(userId, "User ID");
+
+  if (!Number.isInteger(page) || page < 1) {
+    throw new Error("Page must be a positive integer.");
+  }
+
+  const safePageSize = validateLimit(pageSize);
+  const safePage = page;
+  const offset = (safePage - 1) * safePageSize;
+
   const normalizedSearch = search?.trim();
 
   const conditions: SQL[] = [eq(guides.userId, userId)];
@@ -108,31 +119,66 @@ export async function getGuideScheduledTours(
       conditions.push(searchCondition);
     }
   }
-  return db
-    .select({
-      id: scheduledTours.id,
-      externalId: scheduledTours.externalId,
-      tourDate: scheduledTours.tourDate,
-      startTime: scheduledTours.startTime,
-      endTime: scheduledTours.endTime,
-      status: scheduledTours.status,
-      numberOfPeople: scheduledTours.numberOfPeople,
-      tourName: tours.name,
-      pickupLocation: pickupLocations.name,
-    })
-    .from(scheduledTours)
-    .innerJoin(
-      scheduledTourGuides,
-      eq(scheduledTourGuides.scheduledTourId, scheduledTours.id),
-    )
-    .innerJoin(guides, eq(guides.id, scheduledTourGuides.guideId))
-    .innerJoin(tours, eq(tours.id, scheduledTours.tourId))
-    .innerJoin(
-      pickupLocations,
-      eq(pickupLocations.id, scheduledTours.pickupLocationId),
-    )
-    .where(and(...conditions))
-    .orderBy(asc(scheduledTours.tourDate), asc(scheduledTours.startTime));
+
+  const whereCondition = and(...conditions);
+
+  const [items, totalResult] = await Promise.all([
+    db
+      .select({
+        id: scheduledTours.id,
+        externalId: scheduledTours.externalId,
+        tourDate: scheduledTours.tourDate,
+        startTime: scheduledTours.startTime,
+        endTime: scheduledTours.endTime,
+        status: scheduledTours.status,
+        numberOfPeople: scheduledTours.numberOfPeople,
+        tourName: tours.name,
+        pickupLocation: pickupLocations.name,
+      })
+      .from(scheduledTours)
+      .innerJoin(
+        scheduledTourGuides,
+        eq(scheduledTourGuides.scheduledTourId, scheduledTours.id),
+      )
+      .innerJoin(guides, eq(guides.id, scheduledTourGuides.guideId))
+      .innerJoin(tours, eq(tours.id, scheduledTours.tourId))
+      .innerJoin(
+        pickupLocations,
+        eq(pickupLocations.id, scheduledTours.pickupLocationId),
+      )
+      .where(whereCondition)
+      .orderBy(asc(scheduledTours.tourDate), asc(scheduledTours.startTime))
+      .limit(safePageSize)
+      .offset(offset),
+
+    db
+      .select({
+        count: count(),
+      })
+      .from(scheduledTours)
+      .innerJoin(
+        scheduledTourGuides,
+        eq(scheduledTourGuides.scheduledTourId, scheduledTours.id),
+      )
+      .innerJoin(guides, eq(guides.id, scheduledTourGuides.guideId))
+      .innerJoin(tours, eq(tours.id, scheduledTours.tourId))
+      .innerJoin(
+        pickupLocations,
+        eq(pickupLocations.id, scheduledTours.pickupLocationId),
+      )
+      .where(whereCondition),
+  ]);
+
+  const total = Number(totalResult[0]?.count ?? 0);
+  const totalPages = Math.ceil(total / safePageSize);
+
+  return {
+    items,
+    total,
+    page: safePage,
+    pageSize: safePageSize,
+    totalPages,
+  };
 }
 
 export async function getGuideDashboardStats(userId: string) {

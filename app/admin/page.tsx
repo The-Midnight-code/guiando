@@ -10,7 +10,7 @@ export default async function AdminDashboardPage() {
     getUpcomingTours(),
   ]);
 
-  const client = await clerkClient();
+  const guideImageMap = new Map<string, string>();
 
   const clerkIds = upcomingTours
     .map((tour) => tour.guideClerkId)
@@ -18,13 +18,17 @@ export default async function AdminDashboardPage() {
 
   const uniqueClerkIds = [...new Set(clerkIds)];
 
-  const { data: clerkUsers } = await client.users.getUserList({
-    userId: uniqueClerkIds,
-  });
+  if (uniqueClerkIds.length > 0) {
+    const client = await clerkClient();
 
-  const guideImageMap = new Map(
-    clerkUsers.map((user) => [user.id, user.imageUrl]),
-  );
+    const { data: clerkUsers } = await client.users.getUserList({
+      userId: uniqueClerkIds,
+    });
+
+    for (const user of clerkUsers) {
+      guideImageMap.set(user.id, user.imageUrl);
+    }
+  }
 
   const upcomingToursWithImages = upcomingTours.map((tour) => ({
     ...tour,

@@ -12,7 +12,7 @@ export default async function AdminGuidesPage() {
     getPendingGuideInvitations(),
   ]);
 
-  const client = await clerkClient();
+  const guideImageMap = new Map<string, string>();
 
   const clerkIds = guides
     .map((guide) => guide.user?.clerkId)
@@ -20,13 +20,17 @@ export default async function AdminGuidesPage() {
 
   const uniqueClerkIds = [...new Set(clerkIds)];
 
-  const { data: clerkUsers } = await client.users.getUserList({
-    userId: uniqueClerkIds,
-  });
+  if (uniqueClerkIds.length > 0) {
+    const client = await clerkClient();
 
-  const guideImageMap = new Map(
-    clerkUsers.map((user) => [user.id, user.imageUrl]),
-  );
+    const { data: clerkUsers } = await client.users.getUserList({
+      userId: uniqueClerkIds,
+    });
+
+    for (const user of clerkUsers) {
+      guideImageMap.set(user.id, user.imageUrl);
+    }
+  }
 
   const guidesWithImages = guides.map((guide) => ({
     ...guide,

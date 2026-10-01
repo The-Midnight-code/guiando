@@ -1,8 +1,9 @@
 import { getFinancialReportRows } from "@/lib/queries/financials";
-import ReportsFilters from "@/components/reports/ReporstFilters";
+import { getScheduledTourStatuses } from "@/lib/queries/scheduledTours";
 import { getActiveTourTypes } from "@/lib/queries/tourTypes";
 import { getActiveTours } from "@/lib/queries/tours";
-import { getScheduledTourStatuses } from "@/lib/queries/scheduledTours";
+
+import ReportsFilters from "@/components/reports/ReporstFilters";
 
 export default async function ReportsPage({
   searchParams,
@@ -17,6 +18,7 @@ export default async function ReportsPage({
   }>;
 }) {
   const params = await searchParams;
+
   const page = Math.max(1, Number(params.page ?? "1"));
 
   const today = new Date();
@@ -56,12 +58,22 @@ export default async function ReportsPage({
     totalPayments > 0 ? (totalRevenue / totalPayments) * 100 : 0;
 
   const formatUsd = (value: string | null) => {
-    if (value == null) return "—";
+    if (value == null) {
+      return "—";
+    }
 
     return `$${Number(value).toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
+  };
+
+  const filterParams = {
+    startDate,
+    endDate,
+    ...(tourTypeId && { tourTypeId }),
+    ...(tourId && { tourId }),
+    ...(status && { status }),
   };
 
   return (
@@ -76,18 +88,15 @@ export default async function ReportsPage({
         </div>
 
         <a
-          href={`/api/reports/financials/export?${new URLSearchParams({
-            startDate,
-            endDate,
-            ...(tourTypeId && { tourTypeId }),
-            ...(tourId && { tourId }),
-            ...(status && { status }),
-          }).toString()}`}
+          href={`/api/reports/financials/export?${new URLSearchParams(
+            filterParams,
+          ).toString()}`}
           className="w-full rounded-md bg-primary px-4 py-2 text-center text-sm font-medium text-white hover:bg-primary-hover sm:w-auto"
         >
           Export CSV
         </a>
       </div>
+
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-xl border bg-card p-5">
           <p className="text-sm text-muted-foreground">Total Payments</p>
@@ -129,6 +138,7 @@ export default async function ReportsPage({
           </p>
         </div>
       </section>
+
       <section className="rounded-xl border bg-card p-6">
         <div className="mb-5">
           <h2 className="text-lg font-semibold">Filters</h2>
@@ -176,9 +186,11 @@ export default async function ReportsPage({
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                     Tour
                   </th>
+
                   <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
                     People
                   </th>
+
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
                     Status
                   </th>
@@ -194,6 +206,7 @@ export default async function ReportsPage({
                   <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
                     Revenue (USD)
                   </th>
+
                   <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
                     Margin
                   </th>
@@ -210,6 +223,7 @@ export default async function ReportsPage({
                     <td className="px-4 py-3 text-sm font-medium text-foreground">
                       {row.tourName}
                     </td>
+
                     <td className="px-4 py-3 text-right text-sm text-muted-foreground">
                       {row.numberOfPeople ?? "—"}
                     </td>
@@ -229,6 +243,7 @@ export default async function ReportsPage({
                     <td className="px-4 py-3 text-right text-sm text-muted-foreground">
                       {formatUsd(row.totalRevenueUsd)}
                     </td>
+
                     <td className="px-4 py-3 text-right text-sm text-muted-foreground">
                       {row.revenuePercentage != null
                         ? `${Number(row.revenuePercentage).toFixed(2)}%`
@@ -237,6 +252,7 @@ export default async function ReportsPage({
                   </tr>
                 ))}
               </tbody>
+
               <tfoot className="border-t bg-card-secondary">
                 <tr>
                   <td
@@ -270,6 +286,7 @@ export default async function ReportsPage({
                 </tr>
               </tfoot>
             </table>
+
             {totalPages > 1 && (
               <div className="mt-4 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-muted-foreground">
@@ -281,11 +298,7 @@ export default async function ReportsPage({
                   {page > 1 && (
                     <a
                       href={`?${new URLSearchParams({
-                        startDate,
-                        endDate,
-                        ...(tourTypeId && { tourTypeId }),
-                        ...(tourId && { tourId }),
-                        ...(status && { status }),
+                        ...filterParams,
                         page: String(page - 1),
                       }).toString()}`}
                       className="rounded-md border px-3 py-2 text-sm font-medium text-foreground hover:bg-card-secondary"
@@ -301,11 +314,7 @@ export default async function ReportsPage({
                     <a
                       key={pageNumber}
                       href={`?${new URLSearchParams({
-                        startDate,
-                        endDate,
-                        ...(tourTypeId && { tourTypeId }),
-                        ...(tourId && { tourId }),
-                        ...(status && { status }),
+                        ...filterParams,
                         page: String(pageNumber),
                       }).toString()}`}
                       className={`rounded-md border px-3 py-2 text-sm font-medium ${
@@ -321,11 +330,7 @@ export default async function ReportsPage({
                   {page < totalPages && (
                     <a
                       href={`?${new URLSearchParams({
-                        startDate,
-                        endDate,
-                        ...(tourTypeId && { tourTypeId }),
-                        ...(tourId && { tourId }),
-                        ...(status && { status }),
+                        ...filterParams,
                         page: String(page + 1),
                       }).toString()}`}
                       className="rounded-md border px-3 py-2 text-sm font-medium text-foreground hover:bg-card-secondary"

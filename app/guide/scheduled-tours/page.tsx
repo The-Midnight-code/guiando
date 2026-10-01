@@ -12,8 +12,11 @@ interface GuideScheduledToursPageProps {
   searchParams: Promise<{
     status?: string;
     search?: string;
+    page?: string;
+    pageSize?: string;
   }>;
 }
+
 export default async function GuideScheduledToursPage({
   searchParams,
 }: GuideScheduledToursPageProps) {
@@ -29,9 +32,31 @@ export default async function GuideScheduledToursPage({
     redirect("/guide");
   }
 
-  const { status, search } = await searchParams;
+  const params = await searchParams;
 
-  const tours = await getGuideScheduledTours(user.id, status, search);
+  const status = params.status;
+  const search = params.search;
+
+  const page = Math.max(Number(params.page) || 1, 1);
+
+  const requestedPageSize = Number(params.pageSize);
+
+  const pageSize =
+    requestedPageSize === 10 ||
+    requestedPageSize === 20 ||
+    requestedPageSize === 50
+      ? requestedPageSize
+      : 20;
+
+  const result = await getGuideScheduledTours(
+    user.id,
+    status,
+    search,
+    page,
+    pageSize,
+  );
+
+  const { items: tours, total, totalPages } = result;
 
   const detailQuery = new URLSearchParams();
 
@@ -45,19 +70,42 @@ export default async function GuideScheduledToursPage({
 
   const detailQueryString = detailQuery.toString();
 
+  const createPageUrl = (targetPage: number) => {
+    const query = new URLSearchParams();
+
+    if (status) {
+      query.set("status", status);
+    }
+
+    if (search) {
+      query.set("search", search);
+    }
+
+    if (pageSize !== 20) {
+      query.set("pageSize", String(pageSize));
+    }
+
+    query.set("page", String(targetPage));
+
+    return `/guide/scheduled-tours?${query.toString()}`;
+  };
+
   return (
     <main className="space-y-8 px-4 py-6 sm:px-6 lg:px-8">
       <div>
         <h1 className="text-2xl font-semibold">Scheduled Tours</h1>
+
         <p className="mt-1 text-sm text-muted-foreground">
           Tours assigned to you.
         </p>
       </div>
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <TourSearch value={search} status={status} />
 
         <StatusFilter value={status} search={search} />
       </div>
+
       <section className="rounded-lg border bg-card">
         {tours.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
@@ -213,6 +261,34 @@ export default async function GuideScheduledToursPage({
                 </div>
               ))}
             </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between border-t px-6 py-4">
+                <p className="text-sm text-muted-foreground">
+                  Page {page} of {totalPages} · {total} tours
+                </p>
+
+                <div className="flex gap-2">
+                  {page > 1 && (
+                    <Link
+                      href={createPageUrl(page - 1)}
+                      className="rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-card-secondary"
+                    >
+                      Previous
+                    </Link>
+                  )}
+
+                  {page < totalPages && (
+                    <Link
+                      href={createPageUrl(page + 1)}
+                      className="rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-card-secondary"
+                    >
+                      Next
+                    </Link>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </section>
