@@ -9,7 +9,6 @@ export async function getTours() {
     with: {
       tourType: true,
       tourClass: true,
-      photos: true,
     },
   });
 }

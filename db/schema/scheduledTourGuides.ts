@@ -1,4 +1,4 @@
-import { pgTable, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { index, pgTable, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 
 import { guides } from "./guides";
 import { scheduledTours } from "./scheduledTours";
@@ -23,5 +23,6 @@ export const scheduledTourGuides = pgTable(
       table.scheduledTourId,
       table.guideId,
     ),
+    index("scheduled_tour_guides_guide_id_idx").on(table.guideId),
   ],
 );

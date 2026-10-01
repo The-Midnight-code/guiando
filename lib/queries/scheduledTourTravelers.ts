@@ -1,7 +1,5 @@
 import { db } from "@/db/db";
-
 import { and, count, eq } from "drizzle-orm";
-
 import { scheduledTourTravelers, scheduledTours } from "@/db/schema";
 
 function validateExternalId(externalId: number): void {
@@ -11,13 +9,13 @@ function validateExternalId(externalId: number): void {
 }
 
 export async function getTravelersForScheduledTour(externalId: number) {
+  validateExternalId(externalId);
+
   const scheduledTour = await db.query.scheduledTours.findFirst({
     where: {
       externalId,
     },
   });
-
-  validateExternalId(externalId);
 
   if (!scheduledTour) {
     return [];
@@ -38,6 +36,7 @@ export async function assignTravelerToScheduledTour(
   travelerId: string,
 ) {
   validateExternalId(externalId);
+
   return db.transaction(async (tx) => {
     const [scheduledTour] = await tx
       .select()
@@ -96,6 +95,7 @@ export async function removeTravelerFromScheduledTour(
   travelerId: string,
 ) {
   validateExternalId(externalId);
+
   return db.transaction(async (tx) => {
     const [scheduledTour] = await tx
       .select()
@@ -142,6 +142,7 @@ export async function removeTravelerFromScheduledTour(
 
 export async function syncNumberOfPeople(externalId: number) {
   validateExternalId(externalId);
+
   const scheduledTour = await db.query.scheduledTours.findFirst({
     where: {
       externalId,

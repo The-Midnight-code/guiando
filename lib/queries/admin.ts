@@ -70,10 +70,12 @@ export async function getUpcomingTours(limit = 5) {
     .innerJoin(users, eq(users.id, guides.userId))
     .where(inArray(scheduledTourGuides.scheduledTourId, tourIds));
 
+  const guidesByTourId = new Map(
+    assignedGuides.map((guide) => [guide.scheduledTourId, guide]),
+  );
+
   return upcomingTours.map((tour) => {
-    const guide = assignedGuides.find(
-      (item) => item.scheduledTourId === tour.id,
-    );
+    const guide = guidesByTourId.get(tour.id);
 
     return {
       ...tour,
