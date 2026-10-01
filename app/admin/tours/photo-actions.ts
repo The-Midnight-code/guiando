@@ -1,5 +1,8 @@
 "use server";
+
 import { requireAdmin } from "@/lib/auth/permissions";
+import { getDatabaseErrorMessage } from "@/lib/errors/database";
+
 import {
   createTourPhoto,
   updateTourPhoto,
@@ -7,9 +10,24 @@ import {
   type CreateTourPhotoInput,
 } from "@/lib/queries/tourPhotos";
 
+function getTourPhotoErrorMessage(error: unknown): string | null {
+  if (!(error instanceof Error)) return null;
+
+  const knownErrors = new Set([
+    "Photo ID must be a valid UUID.",
+    "Tour ID must be a valid UUID.",
+    "Photo URL is required.",
+    "Sort order must be a non-negative integer.",
+    "Tour not found.",
+  ]);
+
+  return knownErrors.has(error.message) ? error.message : null;
+}
+
 export async function createTourPhotoAction(input: CreateTourPhotoInput) {
+  await requireAdmin();
+
   try {
-    await requireAdmin();
     const photo = await createTourPhoto(input);
 
     return {
@@ -21,7 +39,10 @@ export async function createTourPhotoAction(input: CreateTourPhotoInput) {
 
     return {
       success: false,
-      error: "Failed to create tour photo.",
+      error:
+        getTourPhotoErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to create tour photo.",
     };
   }
 }
@@ -31,6 +52,7 @@ export async function updateTourPhotoAction(
   input: Omit<CreateTourPhotoInput, "tourId">,
 ) {
   await requireAdmin();
+
   try {
     const photo = await updateTourPhoto(id, input);
 
@@ -50,13 +72,17 @@ export async function updateTourPhotoAction(
 
     return {
       success: false,
-      error: "Failed to update tour photo.",
+      error:
+        getTourPhotoErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to update tour photo.",
     };
   }
 }
 
 export async function deleteTourPhotoAction(id: string) {
   await requireAdmin();
+
   try {
     const photo = await deleteTourPhoto(id);
 
@@ -76,7 +102,10 @@ export async function deleteTourPhotoAction(id: string) {
 
     return {
       success: false,
-      error: "Failed to delete tour photo.",
+      error:
+        getTourPhotoErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to delete tour photo.",
     };
   }
 }
