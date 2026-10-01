@@ -1,5 +1,8 @@
 "use server";
+
 import { requireAdmin } from "@/lib/auth/permissions";
+import { getDatabaseErrorMessage } from "@/lib/errors/database";
+
 import {
   createAffiliate,
   updateAffiliate,
@@ -7,8 +10,20 @@ import {
   type CreateAffiliateInput,
 } from "@/lib/queries/affiliates";
 
+function getAffiliateErrorMessage(error: unknown): string | null {
+  if (!(error instanceof Error)) return null;
+
+  const knownErrors = new Set([
+    "Affiliate ID must be a valid UUID.",
+    "Affiliate name is required.",
+  ]);
+
+  return knownErrors.has(error.message) ? error.message : null;
+}
+
 export async function createAffiliateAction(input: CreateAffiliateInput) {
   await requireAdmin();
+
   try {
     const affiliate = await createAffiliate(input);
 
@@ -21,7 +36,10 @@ export async function createAffiliateAction(input: CreateAffiliateInput) {
 
     return {
       success: false,
-      error: "Failed to create affiliate.",
+      error:
+        getAffiliateErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to create affiliate.",
     };
   }
 }
@@ -31,6 +49,7 @@ export async function updateAffiliateAction(
   input: CreateAffiliateInput,
 ) {
   await requireAdmin();
+
   try {
     const affiliate = await updateAffiliate(id, input);
 
@@ -50,13 +69,17 @@ export async function updateAffiliateAction(
 
     return {
       success: false,
-      error: "Failed to update affiliate.",
+      error:
+        getAffiliateErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to update affiliate.",
     };
   }
 }
 
 export async function toggleAffiliateActiveAction(id: string, active: boolean) {
   await requireAdmin();
+
   try {
     const affiliate = await toggleAffiliateActive(id, active);
 
@@ -76,7 +99,10 @@ export async function toggleAffiliateActiveAction(id: string, active: boolean) {
 
     return {
       success: false,
-      error: "Failed to update affiliate status.",
+      error:
+        getAffiliateErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to update affiliate status.",
     };
   }
 }
