@@ -1,4 +1,4 @@
-import { getFinancialReportRows } from "@/lib/queries/financials";
+import { getFinancialReportExportRows } from "@/lib/queries/financials";
 
 export async function exportFinancialReport(filters: {
   startDate: string;
@@ -7,7 +7,7 @@ export async function exportFinancialReport(filters: {
   tourTypeId?: string;
   status?: string;
 }) {
-  const report = await getFinancialReportRows(filters, 1, 10000);
+  const rows = await getFinancialReportExportRows(filters);
 
   const headers = [
     "Date",
@@ -25,7 +25,7 @@ export async function exportFinancialReport(filters: {
     "Exchange Rate",
   ];
 
-  const rows = report.rows.map((row) => [
+  const exportRows = rows.map((row) => [
     row.tourDate,
     row.tourName,
     row.numberOfPeople ?? "",
@@ -42,12 +42,17 @@ export async function exportFinancialReport(filters: {
   ]);
 
   const escapeCsvValue = (value: unknown) => {
-    const stringValue = String(value ?? "");
+    let stringValue = String(value ?? "");
+
+    if (/^[=+\-@]/.test(stringValue)) {
+      stringValue = `'${stringValue}`;
+    }
 
     if (
       stringValue.includes(",") ||
       stringValue.includes('"') ||
-      stringValue.includes("\n")
+      stringValue.includes("\n") ||
+      stringValue.includes("\r")
     ) {
       return `"${stringValue.replace(/"/g, '""')}"`;
     }
@@ -57,6 +62,6 @@ export async function exportFinancialReport(filters: {
 
   return [
     headers.map(escapeCsvValue).join(","),
-    ...rows.map((row) => row.map(escapeCsvValue).join(",")),
+    ...exportRows.map((row) => row.map(escapeCsvValue).join(",")),
   ].join("\n");
 }
