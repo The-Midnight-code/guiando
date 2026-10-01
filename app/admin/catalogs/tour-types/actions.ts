@@ -1,5 +1,7 @@
 "use server";
+
 import { requireAdmin } from "@/lib/auth/permissions";
+import { getDatabaseErrorMessage } from "@/lib/errors/database";
 
 import {
   createTourType,
@@ -8,8 +10,20 @@ import {
   type CreateTourTypeInput,
 } from "@/lib/queries/tourTypes";
 
+function getTourTypeErrorMessage(error: unknown): string | null {
+  if (!(error instanceof Error)) return null;
+
+  const knownErrors = new Set([
+    "Tour type ID must be a valid UUID.",
+    "Tour type name is required.",
+  ]);
+
+  return knownErrors.has(error.message) ? error.message : null;
+}
+
 export async function createTourTypeAction(input: CreateTourTypeInput) {
   await requireAdmin();
+
   try {
     const tourType = await createTourType(input);
 
@@ -22,7 +36,10 @@ export async function createTourTypeAction(input: CreateTourTypeInput) {
 
     return {
       success: false,
-      error: "Failed to create tour type.",
+      error:
+        getTourTypeErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to create tour type.",
     };
   }
 }
@@ -32,6 +49,7 @@ export async function updateTourTypeAction(
   input: CreateTourTypeInput,
 ) {
   await requireAdmin();
+
   try {
     const tourType = await updateTourType(id, input);
 
@@ -51,13 +69,17 @@ export async function updateTourTypeAction(
 
     return {
       success: false,
-      error: "Failed to update tour type.",
+      error:
+        getTourTypeErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to update tour type.",
     };
   }
 }
 
 export async function toggleTourTypeActiveAction(id: string, active: boolean) {
   await requireAdmin();
+
   try {
     const tourType = await toggleTourTypeActive(id, active);
 
@@ -77,7 +99,10 @@ export async function toggleTourTypeActiveAction(id: string, active: boolean) {
 
     return {
       success: false,
-      error: "Failed to update tour type status.",
+      error:
+        getTourTypeErrorMessage(error) ??
+        getDatabaseErrorMessage(error) ??
+        "Failed to update tour type status.",
     };
   }
 }
