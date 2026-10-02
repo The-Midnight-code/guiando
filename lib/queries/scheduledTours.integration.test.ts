@@ -5,16 +5,21 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db/db";
 
 import {
+  guides,
   pickupLocations,
+  scheduledTourGuides,
   scheduledTours,
   tourFinancials,
   tourTypes,
   tours,
+  users,
 } from "@/db/schema";
 
 import {
+  completeScheduledTour,
   createScheduledTour,
   deleteScheduledTour,
+  getScheduledTourByUuid,
   updateScheduledTour,
 } from "./scheduledTours";
 
@@ -22,6 +27,10 @@ describe("scheduledTours integration", () => {
   let tourTypeId: string;
   let pickupLocationId: string;
   let tourId: string;
+  let userId: string;
+  let guideId: string;
+  let otherUserId: string;
+  let otherGuideId: string;
   let scheduledTourId: string;
   let externalId: number;
 
@@ -61,14 +70,72 @@ describe("scheduledTours integration", () => {
       .returning();
 
     tourId = tour.id;
+
+    const [user] = await db
+      .insert(users)
+      .values({
+        clerkId: `integration-complete-${externalId}`,
+        email: `integration-complete-${externalId}@example.com`,
+        firstName: "Integration",
+        lastName: `Guide ${externalId}`,
+        role: "GUIDE",
+      })
+      .returning();
+
+    userId = user.id;
+
+    const [guide] = await db
+      .insert(guides)
+      .values({
+        userId,
+        active: true,
+      })
+      .returning();
+
+    guideId = guide.id;
+
+    const [otherUser] = await db
+      .insert(users)
+      .values({
+        clerkId: `integration-other-guide-${externalId}`,
+        email: `integration-other-guide-${externalId}@example.com`,
+        firstName: "Other",
+        lastName: `Guide ${externalId}`,
+        role: "GUIDE",
+      })
+      .returning();
+
+    otherUserId = otherUser.id;
+
+    const [otherGuide] = await db
+      .insert(guides)
+      .values({
+        userId: otherUserId,
+        active: true,
+      })
+      .returning();
+
+    otherGuideId = otherGuide.id;
   });
 
   afterAll(async () => {
+    await db
+      .delete(scheduledTourGuides)
+      .where(eq(scheduledTourGuides.scheduledTourId, scheduledTourId));
+
     if (scheduledTourId) {
       await db
         .delete(scheduledTours)
         .where(eq(scheduledTours.id, scheduledTourId));
     }
+
+    await db.delete(guides).where(eq(guides.id, guideId));
+
+    await db.delete(guides).where(eq(guides.id, otherGuideId));
+
+    await db.delete(users).where(eq(users.id, userId));
+
+    await db.delete(users).where(eq(users.id, otherUserId));
 
     await db.delete(tours).where(eq(tours.id, tourId));
 
@@ -96,6 +163,11 @@ describe("scheduledTours integration", () => {
     });
 
     scheduledTourId = scheduledTour.id;
+
+    await db.insert(scheduledTourGuides).values({
+      scheduledTourId,
+      guideId,
+    });
 
     expect(scheduledTour.tourId).toBe(tourId);
     expect(scheduledTour.externalId).toBe(externalId);
@@ -199,6 +271,69 @@ describe("scheduledTours integration", () => {
     await db
       .delete(scheduledTours)
       .where(eq(scheduledTours.id, financialScheduledTour.id));
+  });
+
+  it("does not allow an unassigned guide to complete the scheduled tour", async () => {
+    const completedTour = await completeScheduledTour(
+      scheduledTourId,
+      otherUserId,
+    );
+
+    expect(completedTour).toBeNull();
+
+    const [scheduledTour] = await db
+      .select({
+        status: scheduledTours.status,
+      })
+      .from(scheduledTours)
+      .where(eq(scheduledTours.id, scheduledTourId));
+
+    expect(scheduledTour?.status).toBe("CONFIRMED");
+  });
+
+  it("allows an assigned guide to complete the scheduled tour", async () => {
+    const completedTour = await completeScheduledTour(scheduledTourId, userId);
+
+    expect(completedTour).toBeDefined();
+    expect(completedTour?.id).toBe(scheduledTourId);
+    expect(completedTour?.status).toBe("COMPLETED");
+  });
+
+  it("does not allow a completed tour to be completed again", async () => {
+    const completedTour = await completeScheduledTour(scheduledTourId, userId);
+
+    expect(completedTour).toBeNull();
+
+    const [scheduledTour] = await db
+      .select({
+        status: scheduledTours.status,
+      })
+      .from(scheduledTours)
+      .where(eq(scheduledTours.id, scheduledTourId));
+
+    expect(scheduledTour?.status).toBe("COMPLETED");
+  });
+
+  it("returns the scheduled tour for an assigned guide", async () => {
+    const scheduledTour = await getScheduledTourByUuid(scheduledTourId, userId);
+
+    expect(scheduledTour).toBeDefined();
+    expect(scheduledTour?.id).toBe(scheduledTourId);
+  });
+
+  it("does not return the scheduled tour for an unassigned guide", async () => {
+    const scheduledTour = await getScheduledTourByUuid(
+      scheduledTourId,
+      otherUserId,
+    );
+
+    expect(scheduledTour).toBeUndefined();
+  });
+
+  it("rejects an invalid scheduled tour UUID", async () => {
+    await expect(
+      getScheduledTourByUuid("invalid-uuid", userId),
+    ).rejects.toThrow("Scheduled tour ID must be a valid UUID.");
   });
 
   it("deletes a scheduled tour without financial records", async () => {

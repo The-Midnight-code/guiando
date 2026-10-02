@@ -1,6 +1,6 @@
 import { db } from "@/db/db";
 import { and, count, eq } from "drizzle-orm";
-import { scheduledTourTravelers, scheduledTours } from "@/db/schema";
+import { scheduledTourTravelers, scheduledTours, travelers } from "@/db/schema";
 
 function validateExternalId(externalId: number): void {
   if (!Number.isInteger(externalId) || externalId <= 0) {
@@ -46,6 +46,18 @@ export async function assignTravelerToScheduledTour(
 
     if (!scheduledTour) {
       throw new Error("Scheduled tour not found.");
+    }
+
+    const [traveler] = await tx
+      .select({
+        id: travelers.id,
+      })
+      .from(travelers)
+      .where(eq(travelers.id, travelerId))
+      .limit(1);
+
+    if (!traveler) {
+      throw new Error("Traveler not found.");
     }
 
     const [existingAssignment] = await tx

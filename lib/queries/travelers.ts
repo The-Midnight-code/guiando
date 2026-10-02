@@ -19,6 +19,10 @@ export async function getTravelers() {
 }
 
 export async function getTravelerById(id: string) {
+  if (!isValidUuid(id)) {
+    throw new Error("Traveler ID must be a valid UUID.");
+  }
+
   return db.query.travelers.findFirst({
     where: {
       id,

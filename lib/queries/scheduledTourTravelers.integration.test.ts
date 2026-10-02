@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { eq } from "drizzle-orm";
-
+import { randomUUID } from "crypto";
 import { db } from "@/db/db";
 
 import {
@@ -185,6 +185,22 @@ describe("scheduledTourTravelers integration", () => {
       .where(eq(scheduledTours.id, scheduledTourId));
 
     expect(scheduledTourAfterDuplicate.numberOfPeople).toBe(2);
+  });
+
+  it("rejects assigning a nonexistent traveler", async () => {
+    const nonexistentTravelerId = randomUUID();
+
+    await expect(
+      assignTravelerToScheduledTour(externalId, nonexistentTravelerId),
+    ).rejects.toThrow("Traveler not found.");
+  });
+
+  it("rejects syncing a nonexistent scheduled tour", async () => {
+    const nonexistentExternalId = externalId + 100000;
+
+    await expect(syncNumberOfPeople(nonexistentExternalId)).rejects.toThrow(
+      "Scheduled tour not found.",
+    );
   });
 
   it("can resynchronize numberOfPeople from existing assignments", async () => {

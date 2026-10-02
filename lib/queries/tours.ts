@@ -31,6 +31,8 @@ export async function getActiveTours(tourTypeId?: string) {
 }
 
 export async function getTourById(id: string) {
+  validateUuid(id, "Tour ID");
+
   return db.query.tours.findFirst({
     where: {
       id,
