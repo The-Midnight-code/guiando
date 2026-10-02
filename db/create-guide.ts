@@ -1,5 +1,5 @@
 import { db } from "@/db/db";
-import { guides, users } from "@/db/schema";
+import { guides } from "@/db/schema";
 
 async function main() {
   const user = await db.query.users.findFirst({

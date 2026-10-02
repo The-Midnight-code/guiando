@@ -293,6 +293,8 @@ export default function TourPhotosForm({
                   className="flex flex-col gap-5 rounded-lg border p-4 transition-colors hover:bg-card-secondary md:flex-row"
                 >
                   <div className="h-48 w-full shrink-0 overflow-hidden rounded-md bg-card-secondary md:h-32 md:w-48">
+                    {/* External image URLs are entered by admins and may come from arbitrary domains. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={photo.url}
                       alt={photo.alt ?? "Tour photo"}

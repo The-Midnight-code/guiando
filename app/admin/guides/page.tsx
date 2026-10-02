@@ -1,4 +1,5 @@
 import { clerkClient } from "@clerk/nextjs/server";
+import Image from "next/image";
 
 import {
   getAdminGuides,
@@ -127,9 +128,11 @@ export default async function AdminGuidesPage() {
                   <div className="shrink-0">
                     <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-card-secondary text-lg font-semibold">
                       {guide.imageUrl ? (
-                        <img
+                        <Image
                           src={guide.imageUrl}
                           alt={guideName}
+                          width={56}
+                          height={56}
                           className="h-full w-full object-cover"
                         />
                       ) : (

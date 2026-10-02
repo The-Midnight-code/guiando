@@ -1,9 +1,7 @@
 import { db } from "@/db/db";
 import { and, asc, count, desc, eq, exists, ilike, or, sql } from "drizzle-orm";
 import {
-  affiliates,
   guides,
-  paymentTypes,
   pickupLocations,
   scheduledTourGuides,
   scheduledTours,

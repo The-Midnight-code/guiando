@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -343,12 +344,14 @@ export default function ScheduledToursTable({
                         <div className="flex items-center gap-2">
                           {scheduledTour.guideAssignments[0]?.guide?.user
                             ?.imageUrl ? (
-                            <img
+                            <Image
                               src={
                                 scheduledTour.guideAssignments[0].guide.user
                                   .imageUrl
                               }
                               alt={getGuideName(scheduledTour)}
+                              width={28}
+                              height={28}
                               className="h-7 w-7 shrink-0 rounded-full object-cover"
                             />
                           ) : (
@@ -453,12 +456,14 @@ export default function ScheduledToursTable({
                       <div className="mt-1 flex items-center gap-2">
                         {scheduledTour.guideAssignments[0]?.guide?.user
                           ?.imageUrl ? (
-                          <img
+                          <Image
                             src={
                               scheduledTour.guideAssignments[0].guide.user
                                 .imageUrl
                             }
                             alt={getGuideName(scheduledTour)}
+                            width={28}
+                            height={28}
                             className="h-7 w-7 shrink-0 rounded-full object-cover"
                           />
                         ) : (

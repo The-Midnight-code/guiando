@@ -1,4 +1,4 @@
-import { asc, and, eq, gte, ne, or, ilike, SQL, count } from "drizzle-orm";
+import { SQL, and, asc, count, eq, gte, ilike, or } from "drizzle-orm";
 
 import { db } from "@/db/db";
 import {

@@ -1,6 +1,6 @@
 import { db } from "@/db/db";
 
-import { and, count, eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 
 import {
   scheduledTourTravelers,

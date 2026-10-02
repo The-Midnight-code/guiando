@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -167,13 +168,15 @@ export default function GuideAssignment({
                 <div className="flex min-w-0 items-center gap-3">
                   <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-card">
                     {assignment.guide?.user?.imageUrl ? (
-                      <img
+                      <Image
                         src={assignment.guide.user.imageUrl}
                         alt={
                           assignment.guide
                             ? getGuideName(assignment.guide)
                             : "Guide"
                         }
+                        width={40}
+                        height={40}
                         className="h-full w-full object-cover"
                       />
                     ) : (
@@ -230,9 +233,11 @@ export default function GuideAssignment({
                     <span className="flex min-w-0 items-center gap-3">
                       <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-card-secondary">
                         {selectedGuide.user?.imageUrl ? (
-                          <img
+                          <Image
                             src={selectedGuide.user.imageUrl}
                             alt={getGuideName(selectedGuide)}
+                            width={32}
+                            height={32}
                             className="h-full w-full object-cover"
                           />
                         ) : (
@@ -285,9 +290,11 @@ export default function GuideAssignment({
                           >
                             <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-card-secondary">
                               {guide.user?.imageUrl ? (
-                                <img
+                                <Image
                                   src={guide.user.imageUrl}
                                   alt={getGuideName(guide)}
+                                  width={32}
+                                  height={32}
                                   className="h-full w-full object-cover"
                                 />
                               ) : (

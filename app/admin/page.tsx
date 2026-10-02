@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { clerkClient } from "@clerk/nextjs/server";
 import Link from "next/link";
 
@@ -188,9 +189,11 @@ export default async function AdminDashboardPage() {
                           >
                             <div className="flex items-center gap-2">
                               {tour.guideImageUrl ? (
-                                <img
+                                <Image
                                   src={tour.guideImageUrl}
                                   alt={guideName}
+                                  width={28}
+                                  height={28}
                                   className="h-7 w-7 rounded-full object-cover"
                                 />
                               ) : (
@@ -254,9 +257,11 @@ export default async function AdminDashboardPage() {
 
                         <div className="mt-1 flex items-center gap-2">
                           {tour.guideImageUrl ? (
-                            <img
+                            <Image
                               src={tour.guideImageUrl}
                               alt={guideName}
+                              width={28}
+                              height={28}
                               className="h-7 w-7 rounded-full object-cover"
                             />
                           ) : (

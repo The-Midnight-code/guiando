@@ -1,6 +1,6 @@
 import { db } from "@/db/db";
 
-import { asc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { tourClasses } from "@/db/schema";
 
