@@ -17,8 +17,26 @@ function validateUuid(value: string, fieldName: string): void {
 }
 
 function validatePhotoInput(url: string, sortOrder: number | undefined): void {
-  if (!url.trim()) {
+  const normalizedUrl = url.trim();
+
+  if (!normalizedUrl) {
     throw new Error("Photo URL is required.");
+  }
+
+  if (normalizedUrl.length > 2048) {
+    throw new Error("Photo URL must not exceed 2048 characters.");
+  }
+
+  let parsedUrl: URL;
+
+  try {
+    parsedUrl = new URL(normalizedUrl);
+  } catch {
+    throw new Error("Photo URL must be a valid URL.");
+  }
+
+  if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+    throw new Error("Photo URL must use HTTP or HTTPS.");
   }
 
   if (

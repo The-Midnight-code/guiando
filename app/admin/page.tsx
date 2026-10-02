@@ -57,7 +57,7 @@ export default async function AdminDashboardPage() {
     {
       title: "Travelers",
       value: stats.travelers,
-      href: "/admin/travelers",
+      href: "#",
     },
   ];
 
